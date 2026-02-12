@@ -141,11 +141,6 @@ router.post('/2fa/validate', async (req, res) => {
 // User signup
 router.post('/signup', async (req, res) => {
   try {
-    // Validate CSRF token
-    if (!req.headers['x-csrf-token']) {
-      return res.status(403).json({ error: 'CSRF token required' });
-    }
-    
     const { email, password, fullName } = req.body;
     const existingUser = await models.User.findOne({ where: { email } });
     if (existingUser) {
@@ -172,21 +167,20 @@ router.post('/signup', async (req, res) => {
 // User login
 router.post('/login', async (req, res) => {
   try {
-    // Validate CSRF token
-    if (!req.headers['x-csrf-token']) {
-      return res.status(403).json({ error: 'CSRF token required' });
-    }
-    
     const { email, password } = req.body;
+    console.log('Login attempt:', email);
+    
     const user = await models.User.findOne({
       where: { email, status: 'approved' }
     });
 
+    console.log('User found:', user ? 'Yes' : 'No');
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials or account not approved' });
     }
 
     const validPassword = await bcrypt.compare(password, user.password_hash);
+    console.log('Password valid:', validPassword);
     if (!validPassword) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }

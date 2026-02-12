@@ -5,6 +5,30 @@ import path from 'path';
 const router = express.Router();
 
 /**
+ * Get dashboard summary (comprehensive + performance)
+ */
+router.get('/dashboard-summary', async (req, res) => {
+  try {
+    const [comprehensive, performance] = await Promise.all([
+      reportManager.generateComprehensiveReport(),
+      reportManager.generateReport('performance')
+    ]);
+    res.json({
+      success: true,
+      data: {
+        comprehensive,
+        performance
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
  * Get available report types
  */
 router.get('/types', (req, res) => {

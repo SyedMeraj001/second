@@ -1,16 +1,13 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { getThemeClasses } from '../utils/themeUtils';
-import { Button, Toast } from './ProfessionalUX';
-import ApprovalWorkflow from './ApprovalWorkflow';
 import DataValidation from '../utils/dataValidation';
 import AuditTrail from '../utils/AuditTrail';
 import NotificationSystem from '../utils/NotificationSystem';
 
-const WorkflowDashboard = () => {
+const WorkflowDashboard = ({ onClose }) => {
   const { isDark } = useTheme();
   const theme = getThemeClasses(isDark);
-  const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [pendingApprovals, setPendingApprovals] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [auditEntries, setAuditEntries] = useState([]);
@@ -193,18 +190,23 @@ const WorkflowDashboard = () => {
   };
 
   return (
-    <div className={`min-h-screen p-6 ${theme.bg.gradient}`}>
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className={`text-3xl font-bold ${theme.text.primary}`}>
-            Workflow & Approval Dashboard
-          </h1>
-          <p className={`text-lg ${theme.text.secondary}`}>
-            Manage ESG data approvals, validation, and audit trail
-          </p>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div className={`max-w-7xl w-full my-8 ${theme.bg.card} rounded-xl shadow-2xl`}>
+        {/* Header with Close Button */}
+        <div className="p-6 bg-white shadow-lg border-b-2 border-gray-200 sticky top-0 z-10">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
+                <span className="text-4xl">🔄</span>
+                Workflow & Approval Dashboard
+              </h1>
+              <p className="text-gray-600 mt-1">Manage ESG data approvals, validation, and audit trail</p>
+            </div>
+            <button onClick={onClose} className="text-3xl text-gray-600 hover:text-red-500 hover:rotate-90 transition-all duration-300 hover:bg-gray-100 w-10 h-10 rounded-full flex items-center justify-center">✕</button>
+          </div>
         </div>
 
+        <div className="p-6 max-h-[80vh] overflow-y-auto">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className={`p-6 rounded-xl shadow-lg ${theme.bg.card}`}>
@@ -260,19 +262,12 @@ const WorkflowDashboard = () => {
 
         {/* Action Buttons */}
         <div className="flex flex-wrap gap-4 mb-8">
-          <Button
-            variant="primary"
-            onClick={() => setShowApprovalModal(true)}
-            disabled={pendingApprovals.length === 0}
-          >
-            Review Approvals ({pendingApprovals.length})
-          </Button>
-          <Button variant="outline" onClick={runDataValidation}>
+          <button className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50" onClick={runDataValidation}>
             Run Data Validation
-          </Button>
-          <Button variant="outline" onClick={loadWorkflowData}>
+          </button>
+          <button className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50" onClick={loadWorkflowData}>
             Refresh Dashboard
-          </Button>
+          </button>
         </div>
 
         {/* Main Content Grid */}
@@ -430,9 +425,9 @@ const WorkflowDashboard = () => {
                 <p className={`${theme.text.secondary} mb-4`}>
                   No validation results available
                 </p>
-                <Button variant="outline" onClick={runDataValidation}>
+                <button className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50" onClick={runDataValidation}>
                   Run Validation
-                </Button>
+                </button>
               </div>
             )}
           </div>
@@ -482,24 +477,20 @@ const WorkflowDashboard = () => {
           </div>
         </div>
 
-        {/* Approval Workflow Modal */}
-        {showApprovalModal && (
-          <ApprovalWorkflow
-            data={pendingApprovals}
-            onApprove={handleApproveItems}
-            onReject={handleRejectItems}
-            onClose={() => setShowApprovalModal(false)}
-          />
-        )}
-
         {/* Toast Notifications */}
         {toast && (
-          <Toast
-            message={toast.message}
-            type={toast.type}
-            onClose={() => setToast(null)}
-          />
+          <div className={`fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
+            toast.type === 'success' ? 'bg-green-500 text-white' :
+            toast.type === 'error' ? 'bg-red-500 text-white' :
+            toast.type === 'warning' ? 'bg-yellow-500 text-black' : 'bg-blue-500 text-white'
+          }`}>
+            <div className="flex items-center space-x-2">
+              <span>{toast.message}</span>
+              <button onClick={() => setToast(null)} className="ml-2 text-lg">×</button>
+            </div>
+          </div>
         )}
+        </div>
       </div>
     </div>
   );

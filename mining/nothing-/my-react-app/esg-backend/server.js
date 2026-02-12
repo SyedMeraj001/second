@@ -14,6 +14,7 @@ import frameworkComplianceRoutes from './routes/frameworkComplianceRoutes.js';
 import advancedRoutes from './routes/advanced.js';
 import authRoutes from './routes/auth.js'; // Import Auth Routes
 import supportRoutes from './routes/supportSimple.js'; // Import Support Routes
+import taxonomyRoutes from './routes/taxonomy.js'; // Import Taxonomy Routes
 
 const app = express();
 const PORT = config.port;
@@ -44,25 +45,36 @@ app.get('/api/csrf-token', (req, res) => {
   res.json({ csrfToken: req.csrfToken() });
 });
 
-// Apply CSRF protection to state-changing routes
-app.use('/api/esg', csrfProtection);
-app.use('/api/kpi', csrfProtection);
-app.use('/api/reports', csrfProtection);
-app.use('/api/iot', csrfProtection);
-app.use('/api/framework-compliance', csrfProtection);
-app.use('/api/advanced', csrfProtection);
+// Apply CSRF protection to state-changing routes only (POST, PUT, DELETE)
+app.use('/api/esg', (req, res, next) => {
+  if (req.method !== 'GET') return csrfProtection(req, res, next);
+  next();
+});
+app.use('/api/iot', (req, res, next) => {
+  if (req.method !== 'GET') return csrfProtection(req, res, next);
+  next();
+});
+app.use('/api/framework-compliance', (req, res, next) => {
+  if (req.method !== 'GET') return csrfProtection(req, res, next);
+  next();
+});
+app.use('/api/advanced', (req, res, next) => {
+  if (req.method !== 'GET') return csrfProtection(req, res, next);
+  next();
+});
 // Serve uploaded files
 app.use('/uploads', express.static('uploads'));
 
-// Routes (no CSRF on read-only routes)
-app.use('/api/auth', authRoutes); // Connect Auth Routes (no CSRF on auth routes)
-app.use('/api/support', supportRoutes); // Connect Support Routes (no CSRF, no rate limit issues)
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/support', supportRoutes);
 app.use('/api/esg', esgRoutes);
 app.use('/api/kpi', kpiRoutes);
 app.use('/api/reports', reportingRoutes);
 app.use('/api/iot', iotRoutes);
 app.use('/api/framework-compliance', frameworkComplianceRoutes);
 app.use('/api/advanced', advancedRoutes);
+app.use('/api/taxonomy', taxonomyRoutes);
 
 // Health check (no CSRF needed for read-only endpoint)
 app.get('/health', (req, res) => {

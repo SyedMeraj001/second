@@ -82,7 +82,8 @@ export const MetricCard = ({
   value, 
   label, 
   trend, 
-  trendColor = 'text-green-500',
+  trendColor = 'success',
+  progress = 75,
   isDark = false 
 }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -103,7 +104,11 @@ export const MetricCard = ({
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center text-white text-xl flex-shrink-0">
             {icon}
           </div>
-          <div className={`text-xs font-medium ${trendColor} text-right`}>
+          <div className={`text-xs font-medium text-right ${
+            trendColor === 'success' ? 'text-green-500' :
+            trendColor === 'info' ? 'text-blue-500' :
+            trendColor === 'neutral' ? 'text-gray-500' : 'text-green-500'
+          }`}>
             {trend}
           </div>
         </div>
@@ -128,7 +133,7 @@ export const MetricCard = ({
         }`}>
           <div 
             className="h-full bg-gradient-to-r from-blue-500 to-green-500 transition-all duration-1000 ease-out rounded-full"
-            style={{ width: isVisible ? '75%' : '0%' }}
+            style={{ width: isVisible ? `${Math.min(progress, 100)}%` : '0%' }}
           />
         </div>
       </div>
@@ -138,9 +143,11 @@ export const MetricCard = ({
 
 export const StatusCard = ({ 
   title, 
-  status, 
+  status = 'active', 
   description, 
   icon, 
+  score = 0,
+  target = 70,
   color = 'blue',
   isDark = false 
 }) => {
@@ -177,12 +184,21 @@ export const StatusCard = ({
         </div>
         
         <div className="flex-1 flex flex-col justify-between">
-          <div className={`inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium mb-3 ${statusColors[color]}`}>
-            {status}
+          <div className="mb-3">
+            <div className="flex items-center justify-between mb-2">
+              <span className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{score}%</span>
+              <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Target: {target}%</span>
+            </div>
+            <div className={`h-2 rounded-full overflow-hidden ${isDark ? 'bg-gray-700' : 'bg-gray-200'}`}>
+              <div 
+                className={`h-full bg-gradient-to-r ${colorClasses[color]} transition-all duration-1000`}
+                style={{ width: `${Math.min(score, 100)}%` }}
+              />
+            </div>
           </div>
-          <p className={`text-sm leading-relaxed ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            {description}
-          </p>
+          <div className={`inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium ${statusColors[color]}`}>
+            {status === 'excellent' ? '✓ Excellent' : status === 'good' ? '✓ Good' : status === 'warning' ? '⚠ Needs Attention' : '→ No Data'}
+          </div>
         </div>
       </div>
     </ProfessionalCard>

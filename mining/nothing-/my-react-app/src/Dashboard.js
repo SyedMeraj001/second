@@ -11,7 +11,6 @@ import ProfessionalHeader from "./components/ProfessionalHeader";
 import EnhancedDataEntry from "./modules/EnhancedDataEntry";
 import PredictiveForecastingDashboard from "./components/PredictiveForecastingDashboard";
 import AIInsightsPanel from "./components/AIInsightsPanel";
-import ScenarioModelingTool from "./components/ScenarioModelingTool";
 import EnhancedScenarioModelling from "./components/EnhancedScenarioModelling";
 import EUTaxonomyNavigator from "./components/EUTaxonomyNavigator";
 import CDPQuestionnaireWizard from "./components/CDPQuestionnaireWizard";
@@ -22,7 +21,7 @@ import AutomatedReminders from "./components/AutomatedReminders";
 import AdvancedBenchmarking from "./components/AdvancedBenchmarking";
 import ComplianceCalendar from "./components/ComplianceCalendarEnhanced";
 import AuditTrailViewer from "./components/AuditTrailViewer";
-import ApprovalWorkflow from "./components/ApprovalWorkflow";
+import WorkflowDashboard from "./components/WorkflowDashboard";
 import EvidenceUploader from "./components/EvidenceUploader";
 import ComplianceReports from "./components/ComplianceReports";
 import SupportTicketing from "./components/SupportTicketing";
@@ -114,10 +113,6 @@ function Dashboard() {
   const [showEnhancedEntry, setShowEnhancedEntry] = useState(false);
   const [showForecasting, setShowForecasting] = useState(false);
   const [showAIInsights, setShowAIInsights] = useState(false);
-  const [showScenarios, setShowScenarios] = useState(false);
-  const [showEUTaxonomy, setShowEUTaxonomy] = useState(false);
-  const [showCDPWizard, setShowCDPWizard] = useState(false);
-  const [showAlertCenter, setShowAlertCenter] = useState(false);
   const [showEnhancedScenarios, setShowEnhancedScenarios] = useState(false);
   const [showRiskHeatmap, setShowRiskHeatmap] = useState(false);
   const [showTaxonomy, setShowTaxonomy] = useState(false);
@@ -129,6 +124,9 @@ function Dashboard() {
   const [showEvidence, setShowEvidence] = useState(false);
   const [showComplianceReports, setShowComplianceReports] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
+  const [showEUTaxonomy, setShowEUTaxonomy] = useState(false);
+  const [showCDPWizard, setShowCDPWizard] = useState(false);
+  const [showAlertCenter, setShowAlertCenter] = useState(false);
   const [reportsData, setReportsData] = useState(null);
   const [analyticsData, setAnalyticsData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -479,18 +477,11 @@ function Dashboard() {
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>AI Insights</span>
                       <span className="ml-auto text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-semibold">NEW</span>
                     </div>
-                    <div onClick={() => setShowScenarios(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
-                      isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
-                    }`}>
-                      <span className="text-lg group-hover:scale-110 transition-transform duration-200">🎯</span>
-                      <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Scenario Modeling (Basic)</span>
-                      <span className="ml-auto text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-semibold">NEW</span>
-                    </div>
                     <div onClick={() => setShowEnhancedScenarios(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
                       isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
                     }`}>
-                      <span className="text-lg group-hover:scale-110 transition-transform duration-200">🚀</span>
-                      <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Enhanced Scenarios</span>
+                      <span className="text-lg group-hover:scale-110 transition-transform duration-200">🎯</span>
+                      <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Scenario Modeling</span>
                       <span className="ml-auto text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full font-semibold">ADVANCED</span>
                     </div>
                     <div onClick={() => setShowEUTaxonomy(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
@@ -721,9 +712,6 @@ function Dashboard() {
       {showAIInsights && (
         <AIInsightsPanel onClose={() => setShowAIInsights(false)} />
       )}
-      {showScenarios && (
-        <ScenarioModelingTool onClose={() => setShowScenarios(false)} />
-      )}
       {showEnhancedScenarios && (
         <EnhancedScenarioModelling onClose={() => setShowEnhancedScenarios(false)} />
       )}
@@ -759,7 +747,7 @@ function Dashboard() {
         <AuditTrailViewer onClose={() => setShowAudit(false)} />
       )}
       {showWorkflow && (
-        <ApprovalWorkflow onClose={() => setShowWorkflow(false)} />
+        <WorkflowDashboard onClose={() => setShowWorkflow(false)} />
       )}
       {showEvidence && (
         <EvidenceUploader dataId="ESG_001" onClose={() => setShowEvidence(false)} />

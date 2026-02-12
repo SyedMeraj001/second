@@ -14,7 +14,6 @@ import UnifiedAdvancedEntry from "./modules/UnifiedAdvancedEntry";
 import SiteHierarchyManager from "./modules/SiteHierarchyManager";
 import { getUserRole } from "./utils/rbac";
 import AuditTrailViewer from "./components/AuditTrailViewer";
-import ApprovalWorkflow from "./components/ApprovalWorkflow";
 import EvidenceUploader from "./components/EvidenceUploader";
 
 function DataEntry() {
@@ -33,7 +32,6 @@ function DataEntry() {
   const [validationResults, setValidationResults] = useState(null);
   const [showValidationPanel, setShowValidationPanel] = useState(false);
   const [showAuditTrail, setShowAuditTrail] = useState(false);
-  const [showApprovals, setShowApprovals] = useState(false);
   const [showEvidence, setShowEvidence] = useState(false);
 
   const steps = [
@@ -573,11 +571,6 @@ function DataEntry() {
             label: 'Audit Trail',
             onClick: () => setShowAuditTrail(true),
             icon: '📋'
-          },
-          {
-            label: 'Approvals',
-            onClick: () => setShowApprovals(true),
-            icon: '✅'
           },
           {
             label: 'Evidence',
@@ -1736,11 +1729,6 @@ function DataEntry() {
         {/* Audit Trail Viewer */}
         {showAuditTrail && (
           <AuditTrailViewer onClose={() => setShowAuditTrail(false)} />
-        )}
-
-        {/* Approval Workflow */}
-        {showApprovals && (
-          <ApprovalWorkflow onClose={() => setShowApprovals(false)} />
         )}
 
         {/* Evidence Uploader */}

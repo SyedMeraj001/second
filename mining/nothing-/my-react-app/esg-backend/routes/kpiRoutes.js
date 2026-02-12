@@ -5,8 +5,8 @@ import { authenticateToken } from '../middleware/authMiddleware.js';
 const router = express.Router();
 
 // GET /api/kpi/:companyId - Calculate real-time KPIs
-// Protected: Any logged in user
-router.get('/:companyId', authenticateToken, async (req, res) => {
+// Public endpoint for dashboard
+router.get('/:companyId', async (req, res) => {
   try {
     const { companyId } = req.params;
 

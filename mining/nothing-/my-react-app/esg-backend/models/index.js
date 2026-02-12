@@ -17,6 +17,7 @@ import AuditorSessions from './AuditorSessions.js';
 import SentimentData from './SentimentData.js';
 import IoTDevice from './IoTDevice.js';
 import IoTSensorData from './IoTSensorData.js';
+import CustomTaxonomy from './CustomTaxonomy.js';
 
 let sequelize;
 let models = {};
@@ -44,6 +45,7 @@ const initializeDatabase = async () => {
     models.SentimentData = SentimentData(sequelize);
     models.IoTDevice = IoTDevice(sequelize);
     models.IoTSensorData = IoTSensorData(sequelize);
+    models.CustomTaxonomy = CustomTaxonomy(sequelize);
 
     // Sync all models
     await sequelize.sync({ alter: true });
