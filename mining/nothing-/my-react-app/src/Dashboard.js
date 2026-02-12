@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import companyLogo from "./companyLogo.jpg";
-import { getStoredData, initializeStorage } from "./utils/storage";
 import APIService from "./services/apiService";
 import ModuleAPI from "./services/moduleAPI";
 import ReportsAPI from "./services/reportsAPI";

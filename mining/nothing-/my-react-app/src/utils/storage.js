@@ -8,7 +8,15 @@ import { DataGovernance } from './dataGovernance.js';
 import { AuditSupport } from './auditSupport.js';
 import { MaterialityAssessment } from './materialityAssessment.js';
 import { SupplyChain } from './supplyChain.js';
-import esgDB from '../api/database.js';
+
+// Lazy load database to avoid circular dependency
+let esgDB = null;
+const getDB = () => {
+  if (!esgDB) {
+    esgDB = require('../api/database.js').default;
+  }
+  return esgDB;
+};
 
 // Save a single ESG data entry with comprehensive validation
 export const saveData = async (entry) => {
@@ -65,7 +73,8 @@ export const saveData = async (entry) => {
     if (response && !response.error) {
       // Persist to local in-memory DB if available (keeps UI consistent)
       try {
-        if (esgDB && typeof esgDB.addEntry === 'function') esgDB.addEntry(enhancedEntry);
+        const db = getDB();
+        if (db && typeof db.addEntry === 'function') db.addEntry(enhancedEntry);
       } catch (e) {
         console.warn('esgDB.addEntry failed:', e);
       }
@@ -98,7 +107,8 @@ export const saveData = async (entry) => {
 
     // Also attempt to persist in esgDB for immediate UI visibility
     try {
-      if (esgDB && typeof esgDB.addEntry === 'function') esgDB.addEntry(enhancedEntry);
+      const db = getDB();
+      if (db && typeof db.addEntry === 'function') db.addEntry(enhancedEntry);
     } catch (e) {
       console.warn('esgDB.addEntry failed:', e);
     }
@@ -129,7 +139,7 @@ export const saveMultiple = (entries) => {
       };
       
       validatedEntries.push(enhancedEntry);
-      esgDB.addEntry(enhancedEntry);
+      getDB().addEntry(enhancedEntry);
     } else {
       errors.push(`Row ${index + 1}: ${validatedEntry.validation.errors.join(', ')}`);
     }
@@ -179,20 +189,25 @@ export const getStoredData = async () => {
 // Initialize ESG storage if empty
 export const initializeStorage = () => {
   // Defensive: esgDB may not be ready during circular import or HMR reloads
-  if (!esgDB || typeof esgDB.updateKPIs !== 'function') {
-    console.warn('esgDB not available yet — skipping initializeStorage');
-    return;
+  try {
+    const db = getDB();
+    if (!db || typeof db.updateKPIs !== 'function') {
+      console.warn('esgDB not available yet — skipping initializeStorage');
+      return;
+    }
+    // Database initializes automatically
+    db.updateKPIs();
+  } catch (e) {
+    console.warn('initializeStorage failed:', e);
   }
-
-  // Database initializes automatically
-  esgDB.updateKPIs();
 };
 
 // Enhanced KPI calculation with analytics
 export const calculateAndSaveKPIs = (filters = {}) => {
-  esgDB.updateKPIs();
-  const kpis = esgDB.getKPIs();
-  const entries = esgDB.getEntries();
+  const db = getDB();
+  db.updateKPIs();
+  const kpis = db.getKPIs();
+  const entries = db.getEntries();
   
   // Enhanced analytics
   const environmentalData = entries.filter(e => e.category === 'environmental');
@@ -211,7 +226,7 @@ export const calculateAndSaveKPIs = (filters = {}) => {
   const avgQualityScore = qualityScores.reduce((a, b) => a + b, 0) / qualityScores.length;
   
   // Compliance rate calculation
-  const complianceDocs = esgDB.getComplianceDocs();
+  const complianceDocs = getDB().getComplianceDocs();
   const approvedDocs = complianceDocs.filter(doc => doc.status === 'Approved').length;
   const complianceRate = complianceDocs.length > 0 ? Math.round((approvedDocs / complianceDocs.length) * 100) : 94;
   
@@ -274,7 +289,8 @@ const calculateKPIsFromData = (data) => {
 
 // Enhanced analytics data with comprehensive insights
 export const getAnalyticsData = () => {
-  const entries = esgDB.getEntries();
+  const db = getDB();
+  const entries = db.getEntries();
   
   // Supply chain analytics
   const suppliers = JSON.parse(localStorage.getItem('suppliers') || '[]');
@@ -292,10 +308,10 @@ export const getAnalyticsData = () => {
   );
   
   return {
-    categoryDistribution: esgDB.getCategoryDistribution(),
-    riskDistribution: esgDB.getRiskDistribution(),
-    monthlyTrends: esgDB.getMonthlyTrends(),
-    trends: esgDB.getTrends(),
+    categoryDistribution: db.getCategoryDistribution(),
+    riskDistribution: db.getRiskDistribution(),
+    monthlyTrends: db.getMonthlyTrends(),
+    trends: db.getTrends(),
     supplyChainRisks,
     materialityMatrix,
     dataQualityMetrics: getDataQualityMetrics(),
@@ -305,17 +321,17 @@ export const getAnalyticsData = () => {
 
 // Get compliance data
 export const getComplianceData = () => {
-  return esgDB.getComplianceDocs();
+  return getDB().getComplianceDocs();
 };
 
 // Add compliance document
 export const addComplianceDoc = (doc) => {
-  return esgDB.addComplianceDoc(doc);
+  return getDB().addComplianceDoc(doc);
 };
 
 // Enhanced data quality and compliance functions
 export const getDataQualityMetrics = () => {
-  const entries = esgDB.getEntries();
+  const entries = getDB().getEntries();
   const qualityChecks = entries.map(entry => 
     DataGovernance.validateDataQuality(entry)
   );
@@ -329,7 +345,7 @@ export const getDataQualityMetrics = () => {
 };
 
 export const getFrameworkCompliance = () => {
-  const entries = esgDB.getEntries();
+  const entries = getDB().getEntries();
   const frameworks = ['GRI', 'SASB', 'TCFD', 'CSRD'];
   
   return frameworks.reduce((compliance, framework) => {
@@ -343,7 +359,8 @@ export const getFrameworkCompliance = () => {
 
 // Generate comprehensive ESG report
 export const generateESGReport = (filters = {}) => {
-  const entries = esgDB.getEntries();
+  const db = getDB();
+  const entries = db.getEntries();
   const kpis = calculateAndSaveKPIs();
   const analytics = getAnalyticsData();
   
