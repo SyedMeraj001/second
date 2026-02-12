@@ -152,7 +152,7 @@ const WorkflowDashboard = () => {
       NotificationSystem.notifyDataValidationFailed(currentUser, validation.details);
     }
     
-    showToast(`Validation completed with ${validation.summary.totalErrors} errors`, 
+    showToast(`Validation completed with ${validation.summary?.totalErrors || 0} errors`, 
       validation.status === 'passed' ? 'success' : 'error');
   };
 
@@ -238,7 +238,7 @@ const WorkflowDashboard = () => {
                 <p className={`text-lg font-bold ${
                   validationResults ? getValidationStatusColor(validationResults.status) : theme.text.primary
                 }`}>
-                  {validationResults ? validationResults.status.toUpperCase() : 'NOT RUN'}
+                  {validationResults?.status ? validationResults.status.toUpperCase() : 'NOT RUN'}
                 </p>
               </div>
               <div className="text-3xl">✅</div>
@@ -394,25 +394,25 @@ const WorkflowDashboard = () => {
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div className={`p-3 rounded-lg ${theme.bg.subtle}`}>
                     <p className="text-red-600 font-bold text-lg">
-                      {validationResults.summary.totalErrors}
+                      {validationResults.summary?.totalErrors || 0}
                     </p>
                     <p className={`text-sm ${theme.text.secondary}`}>Errors</p>
                   </div>
                   <div className={`p-3 rounded-lg ${theme.bg.subtle}`}>
                     <p className="text-yellow-600 font-bold text-lg">
-                      {validationResults.summary.totalWarnings}
+                      {validationResults.summary?.totalWarnings || 0}
                     </p>
                     <p className={`text-sm ${theme.text.secondary}`}>Warnings</p>
                   </div>
                   <div className={`p-3 rounded-lg ${theme.bg.subtle}`}>
                     <p className="text-blue-600 font-bold text-lg">
-                      {validationResults.summary.totalSuggestions}
+                      {validationResults.summary?.totalSuggestions || 0}
                     </p>
                     <p className={`text-sm ${theme.text.secondary}`}>Suggestions</p>
                   </div>
                 </div>
 
-                {validationResults.details.errors.length > 0 && (
+                {validationResults.details?.errors?.length > 0 && (
                   <div>
                     <h3 className={`font-semibold mb-2 text-red-600`}>Critical Errors</h3>
                     <ul className="space-y-1">

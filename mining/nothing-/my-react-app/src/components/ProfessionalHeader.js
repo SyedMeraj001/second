@@ -4,6 +4,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import companyLogo from '../companyLogo.jpg';
 import { getUserRole, USER_ROLES } from '../utils/rbac';
 import ApprovalsPanel from './ApprovalsPanel';
+import AdvancedUserSettings from './AdvancedUserSettings';
 
 const ProfessionalHeader = ({ onLogout, actions = [] }) => {
   const { isDark, toggleTheme } = useTheme();
@@ -15,6 +16,7 @@ const ProfessionalHeader = ({ onLogout, actions = [] }) => {
   const [backgroundTheme, setBackgroundTheme] = useState(localStorage.getItem('backgroundTheme') || null);
   const [showApprovals, setShowApprovals] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
+  const [showSecurity, setShowSecurity] = useState(false);
   const currentUser = localStorage.getItem('currentUser');
   const userRole = getUserRole();
   const isAdmin = userRole === USER_ROLES.SUPER_ADMIN;
@@ -176,6 +178,7 @@ const ProfessionalHeader = ({ onLogout, actions = [] }) => {
   ];
 
   return (
+    <>
     <header className={`sticky top-0 z-50 transition-all duration-300 ${
       isDark 
         ? 'bg-gradient-to-r from-gray-900/95 via-gray-800/95 to-gray-900/95 border-gray-700' 
@@ -415,7 +418,7 @@ const ProfessionalHeader = ({ onLogout, actions = [] }) => {
               {showUserMenu && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)} />
-                  <div className={`absolute right-0 top-10 w-64 rounded-lg shadow-xl border z-50 ${
+                  <div className={`absolute right-0 top-10 w-72 rounded-lg shadow-xl border z-50 ${
                     isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
                   }`}>
                     <div className={`p-4 border-b ${
@@ -429,42 +432,87 @@ const ProfessionalHeader = ({ onLogout, actions = [] }) => {
                     </div>
                     
                     <div className="p-4 space-y-3">
-                      <div>
-                        <label className={`block text-xs font-medium mb-2 ${
-                          isDark ? 'text-gray-300' : 'text-gray-700'
-                        }`}>
-                          Background Theme
-                        </label>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleThemeUpload}
-                          className="hidden"
-                          id="theme-upload"
-                        />
-                        <label
-                          htmlFor="theme-upload"
-                          className={`block w-full p-2 text-center text-xs rounded cursor-pointer transition-colors ${
-                            isDark 
-                              ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-                              : 'bg-blue-100 hover:bg-blue-200 text-blue-700'
-                          }`}
-                        >
-                          📁 Upload Background
-                        </label>
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center text-white text-sm font-bold">
+                          {currentUser ? currentUser.charAt(0).toUpperCase() : 'U'}
+                        </div>
+                        <div>
+                          <div className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                            {currentUser || 'User'}
+                          </div>
+                          <div className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                            {userRole}
+                          </div>
+                        </div>
                       </div>
                       
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          onClick={() => {
+                            setShowSecurity(true);
+                            setShowUserMenu(false);
+                          }}
+                          className={`p-3 rounded-lg text-center transition-colors ${
+                            isDark 
+                              ? 'bg-gray-700 hover:bg-gray-600 text-white' 
+                              : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                          }`}
+                        >
+                          <div className="text-xl mb-1">⚙️</div>
+                          <div className="text-xs font-medium">Settings</div>
+                        </button>
+                        
+                        <label
+                          htmlFor="theme-upload"
+                          className={`p-3 rounded-lg text-center cursor-pointer transition-colors ${
+                            isDark 
+                              ? 'bg-gray-700 hover:bg-gray-600 text-white' 
+                              : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                          }`}
+                        >
+                          <div className="text-xl mb-1">🎨</div>
+                          <div className="text-xs font-medium">Theme</div>
+                        </label>
+                        
+                        <button
+                          onClick={toggleTheme}
+                          className={`p-3 rounded-lg text-center transition-colors ${
+                            isDark 
+                              ? 'bg-gray-700 hover:bg-gray-600 text-white' 
+                              : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                          }`}
+                        >
+                          <div className="text-xl mb-1">{isDark ? '☀️' : '🌙'}</div>
+                          <div className="text-xs font-medium">{isDark ? 'Light' : 'Dark'}</div>
+                        </button>
+                        
+                        <button
+                          onClick={() => {
+                            localStorage.removeItem('userRole');
+                            setShowUserMenu(false);
+                            onLogout();
+                          }}
+                          className="p-3 rounded-lg text-center bg-red-500 hover:bg-red-600 text-white transition-colors"
+                        >
+                          <div className="text-xl mb-1">🚪</div>
+                          <div className="text-xs font-medium">Logout</div>
+                        </button>
+                      </div>
+                      
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleThemeUpload}
+                        className="hidden"
+                        id="theme-upload"
+                      />
+                      
                       {backgroundTheme && (
-                        <div>
-                          <div className={`text-xs mb-2 ${
-                            isDark ? 'text-gray-400' : 'text-gray-600'
-                          }`}>
-                            Current Background:
-                          </div>
+                        <div className="pt-3 border-t border-gray-200">
                           <div className="flex items-center justify-between">
                             <img 
                               src={backgroundTheme} 
-                              alt="Background Theme" 
+                              alt="Background" 
                               className="w-8 h-8 rounded object-cover"
                             />
                             <button
@@ -476,21 +524,6 @@ const ProfessionalHeader = ({ onLogout, actions = [] }) => {
                           </div>
                         </div>
                       )}
-                      
-                      <div className={`pt-3 border-t ${
-                        isDark ? 'border-gray-700' : 'border-gray-200'
-                      }`}>
-                        <button
-                          onClick={() => {
-                            localStorage.removeItem('userRole');
-                            setShowUserMenu(false);
-                            onLogout();
-                          }}
-                          className="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded text-sm font-medium transition-colors"
-                        >
-                          🚪 Logout
-                        </button>
-                      </div>
                     </div>
                   </div>
                 </>
@@ -501,6 +534,12 @@ const ProfessionalHeader = ({ onLogout, actions = [] }) => {
       </div>
 
     </header>
+
+    {/* Advanced User Settings Modal */}
+    {showSecurity && (
+      <AdvancedUserSettings onClose={() => setShowSecurity(false)} />
+    )}
+    </>
   );
 };
 

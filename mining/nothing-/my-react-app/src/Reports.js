@@ -2022,9 +2022,9 @@ function Reports() {
         )}
 
         {/* Enhanced Template Selection and Visualization */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Professional Template List */}
-          <div className={`p-6 rounded-xl shadow-lg no-print ${theme.bg.card} animate-fade-in`} style={{ animationDelay: '0.4s' }}>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* Professional Template List - Made Larger */}
+          <div className={`lg:col-span-2 p-6 rounded-xl shadow-lg no-print ${theme.bg.card} animate-fade-in`} style={{ animationDelay: '0.4s' }}>
             <div className="flex items-center gap-2 mb-6">
               <span className="text-3xl animate-float">📄</span>
               <div>
