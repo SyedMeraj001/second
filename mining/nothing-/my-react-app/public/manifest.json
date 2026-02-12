@@ -1,0 +1,78 @@
+{
+  "name": "ESG Platform - Mining Industry",
+  "short_name": "ESG Platform",
+  "description": "Comprehensive ESG data collection and reporting platform for mining industry",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#1b3a2d",
+  "background_color": "#667eea",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["business", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Data Collection",
+      "short_name": "Collect",
+      "description": "Mobile data collection interface",
+      "url": "/mobile-collection",
+      "icons": [{ "src": "favicon.ico", "sizes": "96x96" }]
+    },
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "ESG performance dashboard",
+      "url": "/dashboard",
+      "icons": [{ "src": "favicon.ico", "sizes": "96x96" }]
+    },
+    {
+      "name": "Reports",
+      "short_name": "Reports",
+      "description": "Generate ESG reports",
+      "url": "/reports",
+      "icons": [{ "src": "favicon.ico", "sizes": "96x96" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "screenshots": [
+    {
+      "src": "screenshot-mobile.png",
+      "type": "image/png",
+      "sizes": "540x720",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "screenshot-desktop.png", 
+      "type": "image/png",
+      "sizes": "1280x720",
+      "form_factor": "wide"
+    }
+  ],
+  "features": [
+    "offline-data-collection",
+    "background-sync",
+    "push-notifications",
+    "gps-location",
+    "camera-access"
+  ]
+}

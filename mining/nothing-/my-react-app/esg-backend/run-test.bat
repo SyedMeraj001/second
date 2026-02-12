@@ -1,0 +1,9 @@
+@echo off
+echo Starting ESG Backend Server...
+start /B npm start
+echo Waiting for server to start...
+timeout /t 3 /nobreak > nul
+echo Running Security Features Test...
+node test-security-features.js
+echo Test completed.
+pause
