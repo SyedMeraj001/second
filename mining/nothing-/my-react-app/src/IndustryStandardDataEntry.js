@@ -6,6 +6,7 @@ import { ESG_FRAMEWORKS } from "./utils/esgFrameworks";
 import DataValidation from "./utils/dataValidation";
 import { ESGMasterIntegration } from "./utils/esgMasterIntegration";
 import APIService from "./services/apiService";
+import AuditSystem from "./utils/auditSystem";
 
 function IndustryStandardDataEntry() {
   const [formData, setFormData] = useState({
@@ -70,6 +71,9 @@ function IndustryStandardDataEntry() {
       const existingUserData = JSON.parse(localStorage.getItem(`esgData_${currentUser}`) || '[]');
       const updatedUserData = [...existingUserData, submissionData];
       localStorage.setItem(`esgData_${currentUser}`, JSON.stringify(updatedUserData));
+      
+      // Audit trail
+      AuditSystem.recordAudit('CREATE', 'Industry Standard Data Entry', `entry_${Date.now()}`, currentUser, { metric: formData.metric, category: formData.category });
       
       // Backend API integration
       const apiResults = await Promise.allSettled([
@@ -165,6 +169,9 @@ function IndustryStandardDataEntry() {
         const existingUserData = JSON.parse(localStorage.getItem(`esgData_${currentUser}`) || '[]');
         const updatedUserData = [...existingUserData, ...formatted];
         localStorage.setItem(`esgData_${currentUser}`, JSON.stringify(updatedUserData));
+        
+        // Audit trail for bulk import
+        AuditSystem.recordAudit('CREATE', 'Bulk Industry Standard Import', `bulk_${Date.now()}`, currentUser, { count: formatted.length, file: file.name });
         
         setUploadProgress(100);
         setTimeout(() => setUploadProgress(0), 2000);

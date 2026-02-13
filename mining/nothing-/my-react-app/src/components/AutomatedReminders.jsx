@@ -16,13 +16,21 @@ const AutomatedReminders = ({ onClose }) => {
     message: ''
   });
 
-  const reminders = [
-    { id: 1, title: 'GRI Report Submission', type: 'deadline', date: '2025-01-15', frequency: 'once', recipients: 'esg-team@company.com', status: 'active', daysUntil: 10 },
-    { id: 2, title: 'Monthly Carbon Data Collection', type: 'data_collection', date: '2025-01-31', frequency: 'monthly', recipients: 'site-managers@company.com', status: 'active', daysUntil: 26 },
-    { id: 3, title: 'Quarterly Board ESG Review', type: 'meeting', date: '2025-02-15', frequency: 'quarterly', recipients: 'board@company.com', status: 'active', daysUntil: 41 },
-    { id: 4, title: 'Annual Sustainability Audit', type: 'audit', date: '2025-03-20', frequency: 'yearly', recipients: 'audit-team@company.com', status: 'active', daysUntil: 74 },
-    { id: 5, title: 'Weekly ESG Metrics Update', type: 'task', date: '2025-01-12', frequency: 'weekly', recipients: 'data-entry@company.com', status: 'active', daysUntil: 7 }
-  ];
+  const [reminders, setReminders] = useState([]);
+
+  useState(() => {
+    const stored = localStorage.getItem('automatedReminders');
+    const defaultReminders = [
+      { id: 1, title: 'GRI Report Submission', type: 'deadline', dueDate: '2025-01-15', frequency: 'once', recipients: 'esg-team@company.com', status: 'active', daysUntil: 10, priority: 'high', category: 'GRI' },
+      { id: 2, title: 'Monthly Carbon Data Collection', type: 'data_collection', dueDate: '2025-01-31', frequency: 'monthly', recipients: 'site-managers@company.com', status: 'active', daysUntil: 26, priority: 'medium', category: 'Environmental' },
+      { id: 3, title: 'Quarterly Board ESG Review', type: 'meeting', dueDate: '2025-02-15', frequency: 'quarterly', recipients: 'board@company.com', status: 'active', daysUntil: 41, priority: 'high', category: 'Governance' },
+      { id: 4, title: 'Annual Sustainability Audit', type: 'audit', dueDate: '2025-03-20', frequency: 'yearly', recipients: 'audit-team@company.com', status: 'active', daysUntil: 74, priority: 'critical', category: 'Audit' },
+      { id: 5, title: 'Weekly ESG Metrics Update', type: 'task', dueDate: '2025-01-12', frequency: 'weekly', recipients: 'data-entry@company.com', status: 'active', daysUntil: 7, priority: 'medium', category: 'Data' }
+    ];
+    const loaded = stored ? JSON.parse(stored) : defaultReminders;
+    setReminders(loaded);
+    if (!stored) localStorage.setItem('automatedReminders', JSON.stringify(defaultReminders));
+  }, []);
 
   const getTypeIcon = (type) => {
     const icons = {
@@ -209,7 +217,7 @@ const AutomatedReminders = ({ onClose }) => {
                         <div className="grid grid-cols-3 gap-4 text-sm">
                           <div>
                             <span className={`${theme.text.secondary}`}>Date:</span>
-                            <p className={theme.text.primary}>{new Date(reminder.date).toLocaleDateString()}</p>
+                            <p className={theme.text.primary}>{new Date(reminder.dueDate).toLocaleDateString()}</p>
                           </div>
                           <div>
                             <span className={`${theme.text.secondary}`}>Frequency:</span>

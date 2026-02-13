@@ -88,4 +88,23 @@ models.forEach(modelName => {
   );
 });
 
+// Risk Assessment endpoint (public)
+router.get('/risk-assessment', async (req, res) => {
+  res.json([]);
+});
+
+// Taxonomies endpoints (public for now)
+router.get('/taxonomies', async (req, res) => {
+  res.json([]);
+});
+
+router.post('/taxonomies', async (req, res) => {
+  try {
+    const taxonomy = { ...req.body, id: Date.now().toString(), createdAt: new Date().toISOString() };
+    res.json({ success: true, taxonomy });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 export default router;

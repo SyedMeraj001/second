@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useTheme } from '../contexts/ThemeContext';
+import { getThemeClasses } from '../utils/themeUtils';
+import { useNavigate } from 'react-router-dom';
 
 const EnterpriseRiskHeatmap = ({ onClose }) => {
+  const { isDark } = useTheme();
+  const theme = getThemeClasses(isDark);
+  const navigate = useNavigate();
   const [riskData, setRiskData] = useState([]);
   const [selectedRisk, setSelectedRisk] = useState(null);
   const [filterCategory, setFilterCategory] = useState('all');
@@ -17,6 +23,36 @@ const EnterpriseRiskHeatmap = ({ onClose }) => {
 
   const impactLevels = ['Very Low', 'Low', 'Medium', 'High', 'Very High'];
   const probabilityLevels = ['Very Low', 'Low', 'Medium', 'High', 'Very High'];
+
+  const handleBack = () => {
+    if (onClose) {
+      onClose();
+    } else {
+      navigate('/dashboard');
+    }
+  };
+
+  const exportData = () => {
+    const exportData = {
+      riskMatrix: filteredRisks,
+      summary: {
+        totalRisks: filteredRisks.length,
+        highRisks: filteredRisks.filter(r => r.riskScore >= 12).length,
+        categories: Object.keys(riskCategories).length
+      },
+      exportDate: new Date().toISOString()
+    };
+    
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `esg-risk-heatmap-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
 
   useEffect(() => {
     loadRiskData();
@@ -145,7 +181,7 @@ const EnterpriseRiskHeatmap = ({ onClose }) => {
     : riskData.filter(risk => risk.category === filterCategory);
 
   const HeatmapView = () => (
-    <div className="bg-white p-6 rounded-lg">
+    <div className={`${theme.bg.card} p-6 rounded-xl backdrop-blur-sm border-0`}>
       <div className="grid grid-cols-6 gap-1 mb-4">
         <div></div>
         {probabilityLevels.map((level, index) => (
@@ -168,7 +204,7 @@ const EnterpriseRiskHeatmap = ({ onClose }) => {
               return (
                 <div
                   key={probIndex}
-                  className="h-16 border border-gray-300 flex items-center justify-center cursor-pointer relative"
+                  className="h-16 border border-white/20 flex items-center justify-center cursor-pointer relative"
                   style={{ backgroundColor: getRiskColor(cellScore) + '40' }}
                   onClick={() => cellRisks.length > 0 && setSelectedRisk(cellRisks[0])}
                 >
@@ -186,7 +222,7 @@ const EnterpriseRiskHeatmap = ({ onClose }) => {
         ))}
       </div>
       
-      <div className="flex justify-between items-center text-sm">
+      <div className={`flex justify-between items-center text-sm ${theme.text.secondary}`}>
         <span>Probability →</span>
         <span>← Impact</span>
       </div>
@@ -194,23 +230,23 @@ const EnterpriseRiskHeatmap = ({ onClose }) => {
   );
 
   const ListView = () => (
-    <div className="bg-white rounded-lg overflow-hidden">
+    <div className={`${theme.bg.card} rounded-xl overflow-hidden backdrop-blur-sm border-0`}>
       <table className="w-full">
-        <thead className="bg-gray-50">
+        <thead className={theme.bg.subtle}>
           <tr>
-            <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Risk</th>
-            <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Category</th>
-            <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Impact</th>
-            <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Probability</th>
-            <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Risk Score</th>
-            <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Owner</th>
+            <th className={`px-4 py-3 text-left text-sm font-medium ${theme.text.primary}`}>Risk</th>
+            <th className={`px-4 py-3 text-left text-sm font-medium ${theme.text.primary}`}>Category</th>
+            <th className={`px-4 py-3 text-left text-sm font-medium ${theme.text.primary}`}>Impact</th>
+            <th className={`px-4 py-3 text-left text-sm font-medium ${theme.text.primary}`}>Probability</th>
+            <th className={`px-4 py-3 text-left text-sm font-medium ${theme.text.primary}`}>Risk Score</th>
+            <th className={`px-4 py-3 text-left text-sm font-medium ${theme.text.primary}`}>Owner</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-200">
+        <tbody className="divide-y divide-white/10">
           {filteredRisks.sort((a, b) => b.riskScore - a.riskScore).map(risk => (
-            <tr key={risk.id} className="hover:bg-gray-50 cursor-pointer"
+            <tr key={risk.id} className={`hover:bg-white/5 cursor-pointer`}
                 onClick={() => setSelectedRisk(risk)}>
-              <td className="px-4 py-3 text-sm font-medium text-gray-900">{risk.name}</td>
+              <td className={`px-4 py-3 text-sm font-medium ${theme.text.primary}`}>{risk.name}</td>
               <td className="px-4 py-3 text-sm">
                 <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
                       style={{ 
@@ -220,15 +256,15 @@ const EnterpriseRiskHeatmap = ({ onClose }) => {
                   {riskCategories[risk.category]?.name}
                 </span>
               </td>
-              <td className="px-4 py-3 text-sm">{impactLevels[risk.impact - 1]}</td>
-              <td className="px-4 py-3 text-sm">{probabilityLevels[risk.probability - 1]}</td>
+              <td className={`px-4 py-3 text-sm ${theme.text.secondary}`}>{impactLevels[risk.impact - 1]}</td>
+              <td className={`px-4 py-3 text-sm ${theme.text.secondary}`}>{probabilityLevels[risk.probability - 1]}</td>
               <td className="px-4 py-3 text-sm">
                 <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white"
                       style={{ backgroundColor: getRiskColor(risk.riskScore) }}>
                   {risk.riskScore}
                 </span>
               </td>
-              <td className="px-4 py-3 text-sm text-gray-600">{risk.owner}</td>
+              <td className={`px-4 py-3 text-sm ${theme.text.secondary}`}>{risk.owner}</td>
             </tr>
           ))}
         </tbody>
@@ -237,11 +273,27 @@ const EnterpriseRiskHeatmap = ({ onClose }) => {
   );
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-100 rounded-lg p-6 max-w-7xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className={`rounded-xl p-6 max-w-7xl w-full max-h-[90vh] overflow-y-auto ${theme.bg.card} backdrop-blur-sm border-0 shadow-2xl`}>
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">Enterprise ESG Risk Heatmap</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl">✕</button>
+          <div>
+            <h2 className={`text-2xl font-bold ${theme.text.primary}`}>Enterprise ESG Risk Heatmap</h2>
+            <p className={`text-sm ${theme.text.secondary} mt-1`}>Comprehensive risk assessment and mitigation planning</p>
+          </div>
+          <div className="flex gap-3">
+            <button 
+              onClick={exportData}
+              className={`px-4 py-2 ${theme.bg.subtle} ${theme.text.primary} rounded-xl hover:bg-white/20 transition-all backdrop-blur-sm border-0`}
+            >
+              📊 Export Data
+            </button>
+            <button
+              onClick={handleBack}
+              className={`px-4 py-2 ${theme.bg.subtle} ${theme.text.primary} rounded-xl hover:bg-white/20 transition-all backdrop-blur-sm border-0`}
+            >
+              ← Back
+            </button>
+          </div>
         </div>
 
         {/* Controls */}
@@ -249,7 +301,7 @@ const EnterpriseRiskHeatmap = ({ onClose }) => {
           <select
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
-            className="px-3 py-2 border rounded-lg"
+            className={`px-3 py-2 rounded-xl ${theme.bg.subtle} ${theme.text.primary} border-0 backdrop-blur-sm`}
           >
             <option value="all">All Categories</option>
             {Object.entries(riskCategories).map(([key, category]) => (
@@ -257,16 +309,16 @@ const EnterpriseRiskHeatmap = ({ onClose }) => {
             ))}
           </select>
           
-          <div className="flex bg-white rounded-lg border">
+          <div className={`flex ${theme.bg.subtle} rounded-xl border-0 backdrop-blur-sm`}>
             <button
               onClick={() => setViewMode('heatmap')}
-              className={`px-4 py-2 rounded-l-lg ${viewMode === 'heatmap' ? 'bg-blue-600 text-white' : 'text-gray-600'}`}
+              className={`px-4 py-2 rounded-l-xl ${viewMode === 'heatmap' ? `${theme.bg.card} ${theme.text.primary}` : theme.text.secondary}`}
             >
               Heatmap
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={`px-4 py-2 rounded-r-lg ${viewMode === 'list' ? 'bg-blue-600 text-white' : 'text-gray-600'}`}
+              className={`px-4 py-2 rounded-r-xl ${viewMode === 'list' ? `${theme.bg.card} ${theme.text.primary}` : theme.text.secondary}`}
             >
               List View
             </button>
@@ -274,28 +326,28 @@ const EnterpriseRiskHeatmap = ({ onClose }) => {
         </div>
 
         {/* Risk Legend */}
-        <div className="bg-white p-4 rounded-lg mb-6">
-          <h3 className="font-semibold mb-3">Risk Level Legend</h3>
+        <div className={`${theme.bg.subtle} p-4 rounded-xl mb-6 backdrop-blur-sm`}>
+          <h3 className={`font-semibold mb-3 ${theme.text.primary}`}>Risk Level Legend</h3>
           <div className="flex flex-wrap gap-4">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded" style={{ backgroundColor: '#16a34a' }}></div>
-              <span className="text-sm">Very Low (1-3)</span>
+              <span className={`text-sm ${theme.text.secondary}`}>Very Low (1-3)</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded" style={{ backgroundColor: '#65a30d' }}></div>
-              <span className="text-sm">Low (4-7)</span>
+              <span className={`text-sm ${theme.text.secondary}`}>Low (4-7)</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded" style={{ backgroundColor: '#d97706' }}></div>
-              <span className="text-sm">Medium (8-11)</span>
+              <span className={`text-sm ${theme.text.secondary}`}>Medium (8-11)</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded" style={{ backgroundColor: '#ea580c' }}></div>
-              <span className="text-sm">High (12-15)</span>
+              <span className={`text-sm ${theme.text.secondary}`}>High (12-15)</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded" style={{ backgroundColor: '#dc2626' }}></div>
-              <span className="text-sm">Very High (16-25)</span>
+              <span className={`text-sm ${theme.text.secondary}`}>Very High (16-25)</span>
             </div>
           </div>
         </div>
@@ -307,12 +359,12 @@ const EnterpriseRiskHeatmap = ({ onClose }) => {
           </div>
 
           {/* Risk Details Panel */}
-          <div className="bg-white p-4 rounded-lg">
-            <h3 className="font-semibold mb-3">Risk Details</h3>
+          <div className={`${theme.bg.card} p-4 rounded-xl backdrop-blur-sm border-0`}>
+            <h3 className={`font-semibold mb-3 ${theme.text.primary}`}>Risk Details</h3>
             {selectedRisk ? (
               <div className="space-y-4">
                 <div>
-                  <h4 className="font-medium text-lg">{selectedRisk.name}</h4>
+                  <h4 className={`font-medium text-lg ${theme.text.primary}`}>{selectedRisk.name}</h4>
                   <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mt-1"
                         style={{ 
                           backgroundColor: riskCategories[selectedRisk.category]?.color + '20',
@@ -323,23 +375,23 @@ const EnterpriseRiskHeatmap = ({ onClose }) => {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Description</label>
-                  <p className="text-sm text-gray-600">{selectedRisk.description}</p>
+                  <label className={`block text-sm font-medium ${theme.text.primary}`}>Description</label>
+                  <p className={`text-sm ${theme.text.secondary}`}>{selectedRisk.description}</p>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Impact</label>
-                    <p className="text-sm">{impactLevels[selectedRisk.impact - 1]}</p>
+                    <label className={`block text-sm font-medium ${theme.text.primary}`}>Impact</label>
+                    <p className={`text-sm ${theme.text.secondary}`}>{impactLevels[selectedRisk.impact - 1]}</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Probability</label>
-                    <p className="text-sm">{probabilityLevels[selectedRisk.probability - 1]}</p>
+                    <label className={`block text-sm font-medium ${theme.text.primary}`}>Probability</label>
+                    <p className={`text-sm ${theme.text.secondary}`}>{probabilityLevels[selectedRisk.probability - 1]}</p>
                   </div>
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Risk Score</label>
+                  <label className={`block text-sm font-medium ${theme.text.primary}`}>Risk Score</label>
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium text-white"
                         style={{ backgroundColor: getRiskColor(selectedRisk.riskScore) }}>
                     {selectedRisk.riskScore}
@@ -347,22 +399,22 @@ const EnterpriseRiskHeatmap = ({ onClose }) => {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Mitigation Strategy</label>
-                  <p className="text-sm text-gray-600">{selectedRisk.mitigation}</p>
+                  <label className={`block text-sm font-medium ${theme.text.primary}`}>Mitigation Strategy</label>
+                  <p className={`text-sm ${theme.text.secondary}`}>{selectedRisk.mitigation}</p>
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Risk Owner</label>
-                  <p className="text-sm">{selectedRisk.owner}</p>
+                  <label className={`block text-sm font-medium ${theme.text.primary}`}>Risk Owner</label>
+                  <p className={`text-sm ${theme.text.secondary}`}>{selectedRisk.owner}</p>
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Last Reviewed</label>
-                  <p className="text-sm">{selectedRisk.lastReviewed}</p>
+                  <label className={`block text-sm font-medium ${theme.text.primary}`}>Last Reviewed</label>
+                  <p className={`text-sm ${theme.text.secondary}`}>{selectedRisk.lastReviewed}</p>
                 </div>
               </div>
             ) : (
-              <p className="text-gray-500 text-sm">Click on a risk in the heatmap or list to view details</p>
+              <p className={`${theme.text.secondary} text-sm`}>Click on a risk in the heatmap or list to view details</p>
             )}
           </div>
         </div>

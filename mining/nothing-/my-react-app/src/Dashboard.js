@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import companyLogo from "./companyLogo.jpg";
-import APIService from "./services/apiService";
 import ModuleAPI from "./services/moduleAPI";
 import ReportsAPI from "./services/reportsAPI";
 import { useTheme } from "./contexts/ThemeContext";
@@ -116,6 +115,7 @@ function Dashboard() {
   const [showEnhancedScenarios, setShowEnhancedScenarios] = useState(false);
   const [showRiskHeatmap, setShowRiskHeatmap] = useState(false);
   const [showTaxonomy, setShowTaxonomy] = useState(false);
+  const [showScenarios, setShowScenarios] = useState(false);
   const [showReminders, setShowReminders] = useState(false);
   const [showBenchmarking, setShowBenchmarking] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
@@ -491,13 +491,6 @@ function Dashboard() {
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>EU Taxonomy</span>
                       <span className="ml-auto text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-semibold">PHASE 2</span>
                     </div>
-                    <div onClick={() => setShowCDPWizard(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
-                      isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
-                    }`}>
-                      <span className="text-lg group-hover:scale-110 transition-transform duration-200">📋</span>
-                      <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>CDP Questionnaire</span>
-                      <span className="ml-auto text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-semibold">PHASE 2</span>
-                    </div>
                     <div onClick={() => setShowAlertCenter(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
                       isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
                     }`}>
@@ -505,6 +498,13 @@ function Dashboard() {
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Alert Center</span>
                       <span className="ml-auto text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-semibold">PHASE 2</span>
                     </div>
+                    <Link to="/cdp-questionnaire" className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                      isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
+                    }`}>
+                      <span className="text-lg group-hover:scale-110 transition-transform duration-200">🌍</span>
+                      <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>CDP Climate Questionnaire</span>
+                      <span className="ml-auto text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-semibold">NEW</span>
+                    </Link>
                     {[
                       { icon: '🎯', label: 'Materiality Assessment', link: '/materiality-assessment' },
                       { icon: '🔗', label: 'Supply Chain ESG', link: '/supply-chain' },
@@ -554,12 +554,6 @@ function Dashboard() {
                     }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">⚙️</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Custom Taxonomy</span>
-                    </div>
-                    <div onClick={() => setShowReminders(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
-                      isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
-                    }`}>
-                      <span className="text-lg group-hover:scale-110 transition-transform duration-200">🔔</span>
-                      <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Reminders</span>
                     </div>
                     <div onClick={() => setShowBenchmarking(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
                       isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'

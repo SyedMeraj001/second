@@ -141,21 +141,21 @@ export const STANDARD_METRICS = {
 };
 
 export const MATERIALITY_TOPICS = [
-  { id: "climate_change", name: "Climate Change", category: "environmental" },
-  { id: "energy_management", name: "Energy Management", category: "environmental" },
-  { id: "water_management", name: "Water Management", category: "environmental" },
-  { id: "waste_management", name: "Waste & Circular Economy", category: "environmental" },
-  { id: "employee_wellbeing", name: "Employee Health & Wellbeing", category: "social" },
-  { id: "diversity_inclusion", name: "Diversity & Inclusion", category: "social" },
-  { id: "human_rights", name: "Human Rights", category: "social" },
-  { id: "data_privacy", name: "Data Privacy & Security", category: "governance" },
-  { id: "business_ethics", name: "Business Ethics & Anti-corruption", category: "governance" },
-  { id: "supply_chain", name: "Supply Chain Management", category: "governance" },
-  { id: "scope3_emissions", name: "Scope 3 Emissions", category: "environmental" },
-  { id: "employee_safety", name: "Employee Safety Metrics", category: "social" },
-  { id: "human_capital", name: "Human Capital Management", category: "social" },
-  { id: "community_relations", name: "Community Relations", category: "social" },
-  { id: "cybersecurity", name: "Cybersecurity & Data Protection", category: "governance" },
-  { id: "ethics_compliance", name: "Ethics & Compliance", category: "governance" },
-  { id: "supplier_assessment", name: "Supplier ESG Assessment", category: "governance" }
+  { id: "climate_change", name: "Climate Change", category: "environmental", esrsCode: "E1", description: "GHG emissions, climate adaptation, transition risks" },
+  { id: "energy_management", name: "Energy Management", category: "environmental", esrsCode: "E1", description: "Energy consumption, renewable energy, energy efficiency" },
+  { id: "water_management", name: "Water & Marine Resources", category: "environmental", esrsCode: "E3", description: "Water consumption, water quality, marine ecosystems" },
+  { id: "biodiversity", name: "Biodiversity & Ecosystems", category: "environmental", esrsCode: "E4", description: "Ecosystem impacts, species protection, land use" },
+  { id: "circular_economy", name: "Resource Use & Circular Economy", category: "environmental", esrsCode: "E5", description: "Material consumption, waste management, circularity" },
+  { id: "pollution", name: "Pollution", category: "environmental", esrsCode: "E2", description: "Air, water, soil pollution prevention" },
+  { id: "own_workforce", name: "Own Workforce", category: "social", esrsCode: "S1", description: "Working conditions, equal treatment, social protection" },
+  { id: "value_chain_workers", name: "Workers in Value Chain", category: "social", esrsCode: "S2", description: "Supply chain labor conditions, contractor workers" },
+  { id: "affected_communities", name: "Affected Communities", category: "social", esrsCode: "S3", description: "Community impacts, indigenous rights, land rights" },
+  { id: "consumers_end_users", name: "Consumers & End-users", category: "social", esrsCode: "S4", description: "Product safety, accessibility, consumer rights" },
+  { id: "business_conduct", name: "Business Conduct", category: "governance", esrsCode: "G1", description: "Corporate culture, anti-corruption, political engagement" },
+  { id: "scope3_emissions", name: "Scope 3 Emissions", category: "environmental", esrsCode: "E1", description: "Value chain emissions, supplier emissions" },
+  { id: "employee_safety", name: "Occupational Health & Safety", category: "social", esrsCode: "S1", description: "Workplace safety, injury rates, health programs" },
+  { id: "human_capital", name: "Human Capital Development", category: "social", esrsCode: "S1", description: "Training, skills development, career progression" },
+  { id: "diversity_inclusion", name: "Diversity & Inclusion", category: "social", esrsCode: "S1", description: "Gender equality, non-discrimination, inclusive culture" },
+  { id: "data_privacy", name: "Data Protection & Privacy", category: "governance", esrsCode: "G1", description: "Personal data protection, cybersecurity, digital rights" },
+  { id: "supply_chain", name: "Supply Chain Management", category: "governance", esrsCode: "G1", description: "Supplier assessment, due diligence, responsible sourcing" }
 ];

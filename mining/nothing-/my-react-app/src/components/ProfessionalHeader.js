@@ -488,6 +488,16 @@ const ProfessionalHeader = ({ onLogout, actions = [] }) => {
                         
                         <button
                           onClick={() => {
+                            const email = localStorage.getItem('currentUser');
+                            if (email) {
+                              try {
+                                const activeSessions = JSON.parse(localStorage.getItem('activeSessions') || '{}');
+                                delete activeSessions[email];
+                                localStorage.setItem('activeSessions', JSON.stringify(activeSessions));
+                              } catch (error) {
+                                console.error('Failed to clear session:', error);
+                              }
+                            }
                             localStorage.removeItem('userRole');
                             setShowUserMenu(false);
                             onLogout();

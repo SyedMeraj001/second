@@ -337,10 +337,12 @@ Key achievements include significant progress in carbon reduction, enhanced empl
       pdf.text('Multi-year ESG performance trends showing progress across all pillars:', 20, yPosition);
       yPosition += 15;
       
+      checkPageBreak(90);
       pdf.addImage(chartImages['performance-trends-chart'], 'PNG', 20, yPosition, pageWidth - 40, 80);
       yPosition += 90;
     });
   }
+  
   addSection('FRAMEWORK COMPLIANCE', () => {
     const complianceData = [
       ['Framework', 'Compliance Level', 'Disclosures', 'Status'],

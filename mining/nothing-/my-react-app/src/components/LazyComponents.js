@@ -24,3 +24,4 @@ export const LazyStakeholderSentimentDashboard = lazy(() => import('./Stakeholde
 export const LazyIoTDashboard = lazy(() => import('./IoTDashboard'));
 export const LazyReportsAnalyticsDashboard = lazy(() => import('./ComprehensiveESGDashboard'));
 export const LazyEnhancedFrameworkCompliance = lazy(() => import('./FrameworkCompliance'));
+export const LazyCDPClimateQuestionnaire = lazy(() => import('./CDPClimateQuestionnaire'));

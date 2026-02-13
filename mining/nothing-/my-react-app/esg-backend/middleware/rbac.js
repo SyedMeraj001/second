@@ -25,7 +25,12 @@ const PERMISSIONS = {
   
   // Verification permissions
   VERIFY_DATA: 'verify_data',
-  UPLOAD_EVIDENCE: 'upload_evidence'
+  UPLOAD_EVIDENCE: 'upload_evidence',
+  
+  // Taxonomy permissions
+  ADD_DATA: 'add_data',
+  EDIT_DATA: 'edit_data',
+  WRITE_DATA: 'write_data'
 };
 
 const ROLE_PERMISSIONS = {
@@ -100,10 +105,4 @@ const requireCompanyAccess = (req, res, next) => {
   next();
 };
 
-module.exports = {
-  ROLES,
-  PERMISSIONS,
-  RBACService,
-  requirePermission,
-  requireCompanyAccess
-};
+export { ROLES, PERMISSIONS, RBACService, requirePermission, requireCompanyAccess };

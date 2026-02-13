@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { USER_ROLES, ROLE_DISPLAY_NAMES, hasPermission, getUserRole, PERMISSIONS } from '../utils/rbac';
 
 const UserManagement = () => {
+  const navigate = useNavigate();
   const { isDark } = useTheme();
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState('all');
   const [showAddUser, setShowAddUser] = useState(false);
+  const [activeUsers, setActiveUsers] = useState(new Set());
   const [newUser, setNewUser] = useState({
     email: '',
     password: '',
@@ -19,15 +22,41 @@ const UserManagement = () => {
 
   useEffect(() => {
     loadUsers();
+    updateActiveUsers();
+    const interval = setInterval(updateActiveUsers, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
     filterUsers();
   }, [users, searchTerm, filterRole]);
 
+  const updateActiveUsers = () => {
+    try {
+      const activeSessions = JSON.parse(localStorage.getItem('activeSessions') || '{}');
+      const now = Date.now();
+      const active = new Set();
+      
+      Object.entries(activeSessions).forEach(([email, lastActive]) => {
+        if (now - lastActive < 60000) {
+          active.add(email);
+        }
+      });
+      
+      setActiveUsers(active);
+    } catch (error) {
+      console.error('Failed to update active users:', error);
+    }
+  };
+
   const loadUsers = () => {
-    const systemUsers = JSON.parse(localStorage.getItem('systemUsers') || '[]');
-    setUsers(systemUsers);
+    try {
+      const systemUsers = JSON.parse(localStorage.getItem('systemUsers') || '[]');
+      setUsers(systemUsers);
+    } catch (error) {
+      console.error('Failed to load users:', error);
+      setUsers([]);
+    }
   };
 
   const filterUsers = () => {
@@ -49,46 +78,56 @@ const UserManagement = () => {
 
   const handleAddUser = () => {
     if (!newUser.email || !newUser.password || !newUser.fullName) {
-      alert('Please fill all fields');
       return;
     }
 
-    const systemUsers = JSON.parse(localStorage.getItem('systemUsers') || '[]');
-    
-    if (systemUsers.some(u => u.email === newUser.email)) {
-      alert('User with this email already exists');
-      return;
-    }
+    try {
+      const systemUsers = JSON.parse(localStorage.getItem('systemUsers') || '[]');
+      
+      if (systemUsers.some(u => u.email === newUser.email)) {
+        return;
+      }
 
-    systemUsers.push(newUser);
-    localStorage.setItem('systemUsers', JSON.stringify(systemUsers));
-    
-    setUsers(systemUsers);
-    setShowAddUser(false);
-    setNewUser({
-      email: '',
-      password: '',
-      fullName: '',
-      role: USER_ROLES.DATA_ENTRY
-    });
+      systemUsers.push(newUser);
+      localStorage.setItem('systemUsers', JSON.stringify(systemUsers));
+      
+      setUsers(systemUsers);
+      setShowAddUser(false);
+      setNewUser({
+        email: '',
+        password: '',
+        fullName: '',
+        role: USER_ROLES.DATA_ENTRY
+      });
+    } catch (error) {
+      console.error('Failed to add user:', error);
+    }
   };
 
   const handleDeleteUser = (email) => {
     if (window.confirm(`Are you sure you want to delete user: ${email}?`)) {
-      const systemUsers = JSON.parse(localStorage.getItem('systemUsers') || '[]');
-      const updatedUsers = systemUsers.filter(u => u.email !== email);
-      localStorage.setItem('systemUsers', JSON.stringify(updatedUsers));
-      setUsers(updatedUsers);
+      try {
+        const systemUsers = JSON.parse(localStorage.getItem('systemUsers') || '[]');
+        const updatedUsers = systemUsers.filter(u => u.email !== email);
+        localStorage.setItem('systemUsers', JSON.stringify(updatedUsers));
+        setUsers(updatedUsers);
+      } catch (error) {
+        console.error('Failed to delete user:', error);
+      }
     }
   };
 
   const handleUpdateRole = (email, newRole) => {
-    const systemUsers = JSON.parse(localStorage.getItem('systemUsers') || '[]');
-    const updatedUsers = systemUsers.map(u =>
-      u.email === email ? { ...u, role: newRole } : u
-    );
-    localStorage.setItem('systemUsers', JSON.stringify(updatedUsers));
-    setUsers(updatedUsers);
+    try {
+      const systemUsers = JSON.parse(localStorage.getItem('systemUsers') || '[]');
+      const updatedUsers = systemUsers.map(u =>
+        u.email === email ? { ...u, role: newRole } : u
+      );
+      localStorage.setItem('systemUsers', JSON.stringify(updatedUsers));
+      setUsers(updatedUsers);
+    } catch (error) {
+      console.error('Failed to update role:', error);
+    }
   };
 
   const getRoleColor = (role) => {
@@ -139,13 +178,21 @@ const UserManagement = () => {
     <div className={`min-h-screen p-6 ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-6">
-          <h1 className={`text-3xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-            👥 User Management
-          </h1>
-          <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            Manage system users and their roles
-          </p>
+        <div className="mb-6 flex justify-between items-start">
+          <div>
+            <h1 className={`text-3xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              👥 User Management
+            </h1>
+            <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              Manage system users and their roles
+            </p>
+          </div>
+          <button
+            onClick={() => navigate(-1)}
+            className={`px-4 py-2 rounded-lg transition-colors ${isDark ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
+          >
+            ← Back
+          </button>
         </div>
 
         {/* Stats Cards */}
@@ -259,12 +306,12 @@ const UserManagement = () => {
                 </tr>
               </thead>
               <tbody className={`divide-y ${isDark ? 'divide-gray-700' : 'divide-gray-200'}`}>
-                {filteredUsers.map((user, index) => (
-                  <tr key={index} className={isDark ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}>
+                {filteredUsers.map((user) => (
+                  <tr key={user.email} className={isDark ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}>
                     <td className={`px-6 py-4 whitespace-nowrap ${isDark ? 'text-white' : 'text-gray-900'}`}>
                       <div className="flex items-center">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center text-white font-bold">
-                          {user.fullName.charAt(0).toUpperCase()}
+                          {user.fullName?.charAt(0)?.toUpperCase() || '?'}
                         </div>
                         <div className="ml-3">
                           <div className="font-medium">{user.fullName}</div>
@@ -288,11 +335,11 @@ const UserManagement = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-3">
                         <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                          user.email === localStorage.getItem('currentUser')
+                          activeUsers.has(user.email)
                             ? 'bg-green-100 text-green-800'
                             : 'bg-gray-100 text-gray-600'
                         }`}>
-                          {user.email === localStorage.getItem('currentUser') ? '🟢 Active' : '⚫ Inactive'}
+                          {activeUsers.has(user.email) ? '🟢 Active' : '⚫ Offline'}
                         </span>
                         <button
                           onClick={() => handleDeleteUser(user.email)}

@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { useTheme } from '../contexts/ThemeContext';
 import { getThemeClasses } from '../utils/themeUtils';
+import { useNavigate } from 'react-router-dom';
 
-const IoTDashboard = () => {
+const IoTDashboard = ({ onClose }) => {
   const { isDark } = useTheme();
   const theme = getThemeClasses(isDark);
+  const navigate = useNavigate();
   const [devices, setDevices] = useState([]);
   const [realTimeMetrics, setRealTimeMetrics] = useState({});
   const [esgImpact, setEsgImpact] = useState(null);
@@ -22,6 +24,14 @@ const IoTDashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [newDevice, setNewDevice] = useState({ deviceId: '', deviceType: '', location: '', metadata: {} });
   const [sensorData, setSensorData] = useState({ deviceId: '', sensorType: '', value: '', unit: '' });
+
+  const handleBack = () => {
+    if (onClose) {
+      onClose();
+    } else {
+      navigate('/dashboard');
+    }
+  };
 
   useEffect(() => {
     fetchAllData();
@@ -299,7 +309,7 @@ const IoTDashboard = () => {
           <h1 className={`text-3xl font-bold ${theme.text.primary}`}>IoT Monitoring Dashboard</h1>
           <p className={`text-sm ${theme.text.secondary} mt-1`}>Real-time device monitoring and ESG impact tracking</p>
         </div>
-        <div className="flex gap-3 flex-wrap">
+        <div className="flex gap-3 flex-wrap items-center">
           <select
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value)}
@@ -326,6 +336,12 @@ const IoTDashboard = () => {
             className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
           >
             📊 Ingest Data
+          </button>
+          <button
+            onClick={handleBack}
+            className={`px-4 py-2 ${theme.bg.card} ${theme.text.primary} rounded-xl hover:bg-white/20 transition-all backdrop-blur-sm border-0 flex items-center gap-2`}
+          >
+            ← Back
           </button>
         </div>
       </div>

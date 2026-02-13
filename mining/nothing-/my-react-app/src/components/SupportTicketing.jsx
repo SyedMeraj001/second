@@ -23,11 +23,9 @@ const SupportTicketing = ({ onClose }) => {
 
   const loadTickets = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/support/tickets', {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-      });
-      const data = await response.json();
-      setTickets(data.tickets || []);
+      // Load from localStorage
+      const storedTickets = JSON.parse(localStorage.getItem('supportTickets') || '[]');
+      setTickets(storedTickets);
     } catch (error) {
       console.error('Failed to load tickets:', error);
     }
@@ -35,11 +33,17 @@ const SupportTicketing = ({ onClose }) => {
 
   const loadStats = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/support/stats', {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-      });
-      const data = await response.json();
-      setStats(data.stats);
+      const storedTickets = JSON.parse(localStorage.getItem('supportTickets') || '[]');
+      const stats = {
+        total: storedTickets.length,
+        byStatus: {
+          open: storedTickets.filter(t => t.status === 'open').length,
+          'in-progress': storedTickets.filter(t => t.status === 'in-progress').length,
+          resolved: storedTickets.filter(t => t.status === 'resolved').length
+        },
+        slaViolations: 0
+      };
+      setStats(stats);
     } catch (error) {
       console.error('Failed to load stats:', error);
     }
@@ -49,21 +53,46 @@ const SupportTicketing = ({ onClose }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/support/tickets', {
+      const currentUser = localStorage.getItem('currentUser') || 'user@example.com';
+      const response = await fetch('/api/reports/support/ticket', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(formData)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: currentUser.split('@')[0],
+          email: currentUser,
+          subject: formData.subject,
+          message: formData.description,
+          priority: formData.priority
+        })
       });
       const data = await response.json();
-      alert(`Ticket created: ${data.ticket.id}`);
-      setFormData({ subject: '', description: '', priority: 'medium', category: 'technical' });
-      setView('list');
-      loadTickets();
+      
+      if (data.success) {
+        // Store ticket in localStorage
+        const storedTickets = JSON.parse(localStorage.getItem('supportTickets') || '[]');
+        const newTicket = {
+          id: data.ticketId,
+          subject: formData.subject,
+          description: formData.description,
+          priority: formData.priority,
+          category: formData.category,
+          status: 'open',
+          created_at: new Date().toISOString(),
+          comments: []
+        };
+        storedTickets.unshift(newTicket);
+        localStorage.setItem('supportTickets', JSON.stringify(storedTickets));
+        
+        alert(`✅ ${data.message}\n\nTicket ID: ${data.ticketId}`);
+        setFormData({ subject: '', description: '', priority: 'medium', category: 'technical' });
+        loadTickets();
+        loadStats();
+        setView('list');
+      } else {
+        alert('Failed to create ticket: ' + (data.error || 'Unknown error'));
+      }
     } catch (error) {
-      alert('Failed to create ticket');
+      alert('Failed to create ticket: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -71,12 +100,12 @@ const SupportTicketing = ({ onClose }) => {
 
   const viewTicket = async (ticketId) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/support/tickets/${ticketId}`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-      });
-      const data = await response.json();
-      setSelectedTicket(data.ticket);
-      setView('detail');
+      const storedTickets = JSON.parse(localStorage.getItem('supportTickets') || '[]');
+      const ticket = storedTickets.find(t => t.id === ticketId);
+      if (ticket) {
+        setSelectedTicket(ticket);
+        setView('detail');
+      }
     } catch (error) {
       alert('Failed to load ticket');
     }
@@ -85,16 +114,19 @@ const SupportTicketing = ({ onClose }) => {
   const addComment = async () => {
     if (!comment.trim()) return;
     try {
-      await fetch(`http://localhost:5000/api/support/tickets/${selectedTicket.id}/comments`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ text: comment })
-      });
-      setComment('');
-      viewTicket(selectedTicket.id);
+      const storedTickets = JSON.parse(localStorage.getItem('supportTickets') || '[]');
+      const ticketIndex = storedTickets.findIndex(t => t.id === selectedTicket.id);
+      if (ticketIndex !== -1) {
+        storedTickets[ticketIndex].comments = storedTickets[ticketIndex].comments || [];
+        storedTickets[ticketIndex].comments.push({
+          comment: comment,
+          created_at: new Date().toISOString(),
+          user: localStorage.getItem('currentUser') || 'user'
+        });
+        localStorage.setItem('supportTickets', JSON.stringify(storedTickets));
+        setComment('');
+        viewTicket(selectedTicket.id);
+      }
     } catch (error) {
       alert('Failed to add comment');
     }

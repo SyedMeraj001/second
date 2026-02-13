@@ -1,9 +1,83 @@
-import { normalizeData, aggregateByYear } from '../Reports';
-
 export class ESGAnalyticsEngine {
   constructor(data) {
-    this.data = normalizeData(data);
-    this.yearlyData = aggregateByYear(this.data);
+    this.rawData = data;
+    this.data = this.normalizeData(data);
+    this.yearlyData = this.aggregateByYear(this.data);
+  }
+
+  normalizeData(data) {
+    return data
+      .map((item, originalIndex) => {
+        let year = null;
+        if (item.reportingYear && !isNaN(parseInt(item.reportingYear))) {
+          year = parseInt(item.reportingYear);
+        } else if (item.timestamp) {
+          try {
+            year = new Date(item.timestamp).getFullYear();
+          } catch {
+            year = new Date().getFullYear();
+          }
+        } else {
+          year = new Date().getFullYear();
+        }
+        
+        if (item.environmental || item.social || item.governance) {
+          const results = [];
+          ['environmental', 'social', 'governance'].forEach(cat => {
+            if (item[cat]) {
+              Object.entries(item[cat]).forEach(([key, value]) => {
+                if (key !== 'description' && value !== '' && !isNaN(parseFloat(value))) {
+                  results.push({
+                    ...item,
+                    category: cat,
+                    metric: key,
+                    value: parseFloat(value),
+                    year,
+                    _originalIndex: originalIndex
+                  });
+                }
+              });
+            }
+          });
+          return results;
+        } else {
+          const category = (item.category || '').toLowerCase();
+          const value = parseFloat(item.value);
+          return [{
+            ...item,
+            year,
+            category,
+            value: isNaN(value) ? null : value,
+            _originalIndex: originalIndex
+          }];
+        }
+      })
+      .flat()
+      .filter(item => item.year && item.category && item.value !== null && ['environmental','social','governance'].includes(item.category));
+  }
+
+  aggregateByYear(data) {
+    const result = {};
+    data.forEach(item => {
+      if (!result[item.year]) {
+        result[item.year] = {
+          year: item.year,
+          environmental: { sum: 0, count: 0 },
+          social: { sum: 0, count: 0 },
+          governance: { sum: 0, count: 0 }
+        };
+      }
+      if (['environmental','social','governance'].includes(item.category)) {
+        result[item.year][item.category].sum += item.value;
+        result[item.year][item.category].count += 1;
+      }
+    });
+    return Object.values(result).map(yearObj => ({
+      year: yearObj.year,
+      environmental: yearObj.environmental.count ? (yearObj.environmental.sum / yearObj.environmental.count).toFixed(2) : 0,
+      social: yearObj.social.count ? (yearObj.social.sum / yearObj.social.count).toFixed(2) : 0,
+      governance: yearObj.governance.count ? (yearObj.governance.sum / yearObj.governance.count).toFixed(2) : 0
+    })).sort((a, b) => a.year - b.year);
   }
 
   // ESG Performance Forecasting

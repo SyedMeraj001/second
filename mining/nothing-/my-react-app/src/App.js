@@ -31,7 +31,8 @@ import {
   LazyStakeholderSentimentDashboard,
   LazyIoTDashboard,
   LazyReportsAnalyticsDashboard,
-  LazyEnhancedFrameworkCompliance
+  LazyEnhancedFrameworkCompliance,
+  LazyCDPClimateQuestionnaire
 } from './components/LazyComponents';
 import RBACProtectedRoute from './components/ProtectedRoute';
 import UserManagement from './components/UserManagement';
@@ -82,6 +83,7 @@ const Layout = () => {
             <Route path="/iot" element={<ProtectedRoute><LazyIoTDashboard /></ProtectedRoute>} />
             <Route path="/reports-analytics" element={<ProtectedRoute><LazyReportsAnalyticsDashboard /></ProtectedRoute>} />
             <Route path="/enhanced-framework-compliance" element={<ProtectedRoute><LazyEnhancedFrameworkCompliance /></ProtectedRoute>} />
+            <Route path="/cdp-questionnaire" element={<ProtectedRoute><LazyCDPClimateQuestionnaire /></ProtectedRoute>} />
             <Route path="/user-management" element={
               <RBACProtectedRoute requiredPermission={PERMISSIONS.MANAGE_USERS}>
                 <UserManagement />

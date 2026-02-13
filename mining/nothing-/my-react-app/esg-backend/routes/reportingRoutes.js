@@ -1,6 +1,7 @@
 import express from 'express';
 import reportManager from '../reports/index.js';
 import path from 'path';
+import nodemailer from 'nodemailer';
 
 const router = express.Router();
 
@@ -231,6 +232,55 @@ router.post('/pdf/generate', async (req, res) => {
       error: error.message
     });
   }
+});
+
+/**
+ * Support Ticket Creation
+ */
+router.post('/support/ticket', async (req, res) => {
+  const { name, email, subject, message, priority } = req.body;
+  
+  if (!name || !email || !subject || !message) {
+    return res.status(400).json({ success: false, error: 'All fields are required' });
+  }
+  
+  const ticketId = `TKT-${Date.now()}`;
+  
+  // Send email notification (non-blocking)
+  try {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'esgeniustechsolutions@gmail.com',
+        pass: process.env.EMAIL_PASS || 'your-app-password'
+      }
+    });
+    
+    transporter.sendMail({
+      from: 'esgeniustechsolutions@gmail.com',
+      to: 'esgeniustechsolutions@gmail.com',
+      subject: `New Support Ticket [${ticketId}] - ${subject}`,
+      html: `
+        <h2>New Support Ticket Received</h2>
+        <p><strong>Ticket ID:</strong> ${ticketId}</p>
+        <p><strong>From:</strong> ${name} (${email})</p>
+        <p><strong>Priority:</strong> ${priority || 'medium'}</p>
+        <p><strong>Subject:</strong> ${subject}</p>
+        <p><strong>Message:</strong></p>
+        <p>${message}</p>
+        <hr>
+        <p><em>Created: ${new Date().toLocaleString()}</em></p>
+      `
+    }).catch(err => console.error('[EMAIL ERROR]', err.message));
+  } catch (error) {
+    console.error('[EMAIL SETUP ERROR]', error.message);
+  }
+  
+  res.json({
+    success: true,
+    ticketId,
+    message: 'Thank you for contacting us! We will get back to you within 24 hours.'
+  });
 });
 
 export default router;

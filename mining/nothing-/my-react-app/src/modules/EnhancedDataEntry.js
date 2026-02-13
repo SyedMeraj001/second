@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { getThemeClasses } from '../utils/themeUtils';
+import AuditSystem from '../utils/auditSystem';
 
 import WaterManagementForm from './environmental/WaterManagementForm';
 import WorkforceManagementForm from './social/WorkforceManagementForm';
@@ -46,6 +47,12 @@ const EnhancedDataEntry = ({ onClose }) => {
   };
 
   const handleDataSave = (data) => {
+    const currentUser = localStorage.getItem('currentUser') || 'admin@esgenius.com';
+    const entryId = `enh_${Date.now()}`;
+    
+    // Audit trail
+    AuditSystem.recordAudit('CREATE', `Enhanced Data Entry - ${selectedModule.title}`, entryId, currentUser, { module: selectedModule.id });
+    
     setToast({ message: 'Data saved successfully!', type: 'success' });
     setTimeout(() => setToast(null), 3000);
     setSelectedModule(null);

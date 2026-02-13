@@ -21,29 +21,29 @@ const CustomTaxonomyBuilder = ({ onClose }) => {
 
   const loadTaxonomies = async () => {
     try {
-      const response = await fetch('/api/esg/taxonomies');
-      const data = await response.json();
-      setTaxonomies(data || []);
+      const stored = localStorage.getItem('customTaxonomies');
+      setTaxonomies(stored ? JSON.parse(stored) : []);
     } catch (error) {
       console.error('Failed to load taxonomies:', error);
     }
   };
 
   const saveTaxonomy = async () => {
+    if (!currentTaxonomy.name) {
+      alert('Please enter a taxonomy name');
+      return;
+    }
+    
     try {
-      const response = await fetch('/api/esg/taxonomies', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(currentTaxonomy)
-      });
-      
-      if (response.ok) {
-        loadTaxonomies();
-        setCurrentTaxonomy({ name: '', description: '', categories: [] });
-        alert('Taxonomy saved successfully!');
-      }
+      const taxonomy = { ...currentTaxonomy, id: Date.now().toString(), createdAt: new Date().toISOString() };
+      const updated = [...taxonomies.filter(t => t.id !== taxonomy.id), taxonomy];
+      localStorage.setItem('customTaxonomies', JSON.stringify(updated));
+      setTaxonomies(updated);
+      setCurrentTaxonomy({ name: '', description: '', categories: [] });
+      alert('Taxonomy saved successfully!');
     } catch (error) {
       console.error('Failed to save taxonomy:', error);
+      alert('Failed to save taxonomy');
     }
   };
 
@@ -124,6 +124,52 @@ const CustomTaxonomyBuilder = ({ onClose }) => {
     }));
   };
 
+  const exportTaxonomy = () => {
+    const data = JSON.stringify(currentTaxonomy, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${currentTaxonomy.name || 'taxonomy'}-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const importTaxonomy = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const imported = JSON.parse(event.target.result);
+          setCurrentTaxonomy(imported);
+          alert('Taxonomy imported successfully!');
+        } catch (error) {
+          alert('Invalid file format');
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  const duplicateTaxonomy = () => {
+    const duplicate = {
+      ...currentTaxonomy,
+      id: Date.now().toString(),
+      name: `${currentTaxonomy.name} (Copy)`,
+      createdAt: new Date().toISOString()
+    };
+    setCurrentTaxonomy(duplicate);
+  };
+
+  const deleteTaxonomy = (id) => {
+    if (confirm('Delete this taxonomy?')) {
+      const updated = taxonomies.filter(t => t.id !== id);
+      localStorage.setItem('customTaxonomies', JSON.stringify(updated));
+      setTaxonomies(updated);
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 max-w-6xl w-full max-h-[90vh] overflow-y-auto">
@@ -136,12 +182,12 @@ const CustomTaxonomyBuilder = ({ onClose }) => {
           {/* Existing Taxonomies */}
           <div className="bg-gray-50 p-4 rounded-lg">
             <h3 className="font-semibold mb-3">Existing Taxonomies</h3>
-            <div className="space-y-2">
+            <div className="space-y-2 max-h-96 overflow-y-auto">
               {taxonomies.map(taxonomy => (
-                <div key={taxonomy.id} className="p-3 bg-white rounded border cursor-pointer hover:bg-blue-50"
-                     onClick={() => setCurrentTaxonomy(taxonomy)}>
-                  <div className="font-medium">{taxonomy.name}</div>
+                <div key={taxonomy.id} className="p-3 bg-white rounded border hover:bg-blue-50">
+                  <div className="font-medium cursor-pointer" onClick={() => setCurrentTaxonomy(taxonomy)}>{taxonomy.name}</div>
                   <div className="text-sm text-gray-600">{taxonomy.categories?.length || 0} categories</div>
+                  <button onClick={() => deleteTaxonomy(taxonomy.id)} className="text-xs text-red-600 hover:text-red-800 mt-1">Delete</button>
                 </div>
               ))}
             </div>
@@ -170,10 +216,20 @@ const CustomTaxonomyBuilder = ({ onClose }) => {
               />
               <div className="flex gap-2">
                 <button onClick={saveTaxonomy} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-                  Save Taxonomy
+                  Save
                 </button>
                 <button onClick={addCategory} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
                   Add Category
+                </button>
+                <button onClick={exportTaxonomy} className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+                  Export
+                </button>
+                <label className="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700 cursor-pointer">
+                  Import
+                  <input type="file" accept=".json" onChange={importTaxonomy} className="hidden" />
+                </label>
+                <button onClick={duplicateTaxonomy} className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
+                  Duplicate
                 </button>
               </div>
             </div>

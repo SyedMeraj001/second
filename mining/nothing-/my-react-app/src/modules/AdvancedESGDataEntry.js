@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { getThemeClasses } from '../utils/themeUtils';
+import AuditSystem from '../utils/auditSystem';
 
 const AdvancedESGDataEntry = ({ onClose }) => {
   const { isDark } = useTheme();
@@ -100,10 +101,16 @@ const AdvancedESGDataEntry = ({ onClose }) => {
       localStorage.setItem('advanced_esg_data', '[]');
       return;
     }
-    existing.push({ ...sanitizedData, timestamp: new Date().toISOString(), tab: activeTab });
+    const entryId = `adv_${Date.now()}`;
+    existing.push({ ...sanitizedData, id: entryId, timestamp: new Date().toISOString(), tab: activeTab });
     // Use secure storage with basic encoding for sensitive ESG data
     const encodedData = btoa(JSON.stringify(existing));
     localStorage.setItem('advanced_esg_data', encodedData);
+    
+    // Audit trail
+    const currentUser = localStorage.getItem('currentUser') || 'admin@esgenius.com';
+    AuditSystem.recordAudit('CREATE', 'Advanced ESG Data Entry', entryId, currentUser, { tab: activeTab, metrics: Object.keys(sanitizedData).length });
+    
     alert('Advanced ESG data saved successfully!');
     setFormData({});
   };

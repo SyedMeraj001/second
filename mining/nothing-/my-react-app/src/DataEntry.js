@@ -6,6 +6,7 @@ import { ESG_FRAMEWORKS } from "./utils/esgFrameworks";
 import DataValidation from "./utils/dataValidation";
 import AuditTrail from "./utils/AuditTrail";
 import { performFullValidation } from "./utils/advancedValidation";
+import AuditSystem from "./utils/auditSystem";
 import { useTheme } from "./contexts/ThemeContext";
 import { getThemeClasses } from "./utils/themeUtils";
 import ProfessionalHeader from "./components/ProfessionalHeader";
@@ -279,6 +280,9 @@ function DataEntry() {
         localStorage.setItem('esgData', JSON.stringify(existing));
         localStorage.setItem('esg_last_submission', JSON.stringify(submissionData));
         
+        // Audit trail
+        AuditSystem.recordAudit('CREATE', 'ESG Data Entry', submissionData.id, userEmail, { companyName: submissionData.companyName, sector: submissionData.sector });
+        
         // Dispatch custom event to notify other components
         window.dispatchEvent(new CustomEvent('esgDataUpdated', { detail: submissionData }));
       } catch (e) {
@@ -382,6 +386,11 @@ function DataEntry() {
         });
 
         setUploadProgress(90);
+        
+        // Audit trail for bulk import
+        const currentUser = localStorage.getItem('currentUser') || 'admin@esgenius.com';
+        AuditSystem.recordAudit('CREATE', 'Bulk ESG Import', `bulk_${Date.now()}`, currentUser, { count: formatted.length, source: file.name });
+        
         // Save each formatted entry to database via ModuleAPI
         const companyId = 'admin@esgenius.com';
         Promise.all(formatted.map(async entry => {

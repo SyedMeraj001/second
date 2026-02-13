@@ -66,6 +66,28 @@ const AuditTrailViewer = ({ dataId = null, onClose }) => {
     a.click();
   };
 
+  const generateSampleData = () => {
+    const actions = [AUDIT_ACTIONS.CREATE, AUDIT_ACTIONS.UPDATE, AUDIT_ACTIONS.DELETE, AUDIT_ACTIONS.UPLOAD, AUDIT_ACTIONS.APPROVE];
+    const users = ['john@company.com', 'sarah@company.com', 'mike@company.com'];
+    const roles = ['esg_manager', 'data_entry', 'supervisor'];
+    
+    for (let i = 0; i < 10; i++) {
+      const action = actions[Math.floor(Math.random() * actions.length)];
+      const user = users[Math.floor(Math.random() * users.length)];
+      const role = roles[Math.floor(Math.random() * roles.length)];
+      
+      AuditSystem.recordAudit(action, {
+        dataId: `ESG_${Math.floor(Math.random() * 1000)}`,
+        description: `Sample ${action} action`,
+        field: 'emissions',
+        oldValue: Math.floor(Math.random() * 100),
+        newValue: Math.floor(Math.random() * 100)
+      });
+    }
+    loadAuditTrail();
+    alert('10 sample audit entries created!');
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className={`max-w-6xl w-full max-h-[90vh] overflow-hidden ${theme.bg.card} rounded-xl shadow-2xl`}>
@@ -116,6 +138,12 @@ const AuditTrailViewer = ({ dataId = null, onClose }) => {
               className={`px-3 py-2 rounded border ${theme.bg.input} ${theme.border.input} ${theme.text.primary}`}
             />
             <div className="flex gap-2">
+              <button
+                onClick={generateSampleData}
+                className="flex-1 px-3 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm"
+              >
+                ➕ Demo Data
+              </button>
               <button
                 onClick={() => exportTrail('json')}
                 className="flex-1 px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
