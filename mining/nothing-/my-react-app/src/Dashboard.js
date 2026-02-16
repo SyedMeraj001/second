@@ -597,12 +597,6 @@ function Dashboard() {
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">📋</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Audit Trail</span>
                     </div>
-                    <div onClick={() => setShowWorkflow(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
-                      isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
-                    }`}>
-                      <span className="text-lg group-hover:scale-110 transition-transform duration-200">✅</span>
-                      <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Workflows</span>
-                    </div>
                     <div onClick={() => setShowEvidence(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
                       isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
                     }`}>

@@ -76,6 +76,7 @@ import {
   LinearScale,
   CategoryScale,
   BarElement,
+  Filler,
 } from "chart.js";
 import esgAPI from "./api/esgAPI";
 import APIService from "./services/apiService";
@@ -97,7 +98,8 @@ ChartJS.register(
   PointElement,
   LinearScale,
   CategoryScale,
-  BarElement
+  BarElement,
+  Filler
 );
 
 // Add 3D animations and styles

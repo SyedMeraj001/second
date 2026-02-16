@@ -410,34 +410,43 @@ function Reports() {
 
   
 
-  // Print the visible report summary (opens a new window with report content and calls print)
-  const handlePrintReport = () => {
-    const el = document.getElementById('report-summary');
-    if (!el) {
-      showToast('No report content to print', 'error');
-      return;
+  // Print the report using the same PDF generation as Save PDF
+  const handlePrintReport = async () => {
+    setIsGenerating(true);
+    try {
+      const esgData = await getStoredData();
+      const companyName = (esgData && esgData.length > 0 && esgData[0].companyName) || 'Company';
+      const framework = selectedReport.includes('GRI') ? 'GRI' : selectedReport.includes('SASB') ? 'SASB' : 'TCFD';
+      const pdf = await generateProfessionalWhitePaper(framework, esgData, {
+        companyName,
+        reportPeriod: selectedYear
+      });
+      
+      // Open PDF in new window for printing
+      const pdfBlob = pdf.output('blob');
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      const printWindow = window.open(pdfUrl, '_blank');
+      
+      if (!printWindow) {
+        showToast('Unable to open print window (popup blocked?)', 'error');
+        URL.revokeObjectURL(pdfUrl);
+        return;
+      }
+      
+      // Trigger print dialog after PDF loads
+      printWindow.onload = () => {
+        setTimeout(() => {
+          printWindow.print();
+        }, 500);
+      };
+      
+      showToast('Opening print dialog...', 'success');
+    } catch (err) {
+      console.error('Failed to generate print report', err);
+      showToast('Failed to generate print report', 'error');
+    } finally {
+      setIsGenerating(false);
     }
-
-    const printWindow = window.open('', '_blank', 'width=1000,height=800');
-    if (!printWindow) {
-      showToast('Unable to open print window (popup blocked?)', 'error');
-      return;
-    }
-
-    // Copy styles from current document
-    const headHtml = Array.from(document.querySelectorAll('link[rel="stylesheet"], style')).map(node => node.outerHTML).join('\n');
-
-    printWindow.document.open();
-    printWindow.document.write('<!doctype html><html><head><title>ESG Report - Print</title>' + headHtml + '</head><body>');
-    printWindow.document.write(el.innerHTML);
-    printWindow.document.write('</body></html>');
-    printWindow.document.close();
-    printWindow.focus();
-    // Delay slightly to allow resources to load
-    setTimeout(() => {
-      printWindow.print();
-      // Do not auto-close so user can inspect printed view; close automatically after short delay optionally
-    }, 600);
   };
 
 
@@ -2021,6 +2030,51 @@ function Reports() {
           </div>
         )}
 
+        {/* Save and Print Actions Bar */}
+        <div className={`p-4 rounded-xl shadow-lg mb-6 ${theme.bg.card} flex flex-wrap items-center justify-between gap-4`}>
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">💾</span>
+            <div>
+              <h3 className={`font-semibold ${theme.text.primary}`}>Export & Print Options</h3>
+              <p className={`text-xs ${theme.text.secondary}`}>Save or print your ESG reports</p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={handleSaveFullReportClick}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
+              disabled={isGenerating || data.length === 0}
+            >
+              <span>💾</span>
+              <span>{isGenerating ? 'Saving...' : 'Save JSON'}</span>
+            </button>
+            <button
+              onClick={handleExportPDF}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
+              disabled={isGenerating || data.length === 0}
+            >
+              <span>📄</span>
+              <span>{isGenerating ? 'Generating...' : 'Save PDF'}</span>
+            </button>
+            <button
+              onClick={handlePrintReportClick}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
+              disabled={data.length === 0}
+            >
+              <span>🖨️</span>
+              <span>Print Report</span>
+            </button>
+            <button
+              onClick={() => setShowPreview(true)}
+              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
+              disabled={data.length === 0}
+            >
+              <span>👁️</span>
+              <span>Preview</span>
+            </button>
+          </div>
+        </div>
+
         {/* Enhanced Template Selection and Visualization */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           {/* Professional Template List - Made Larger */}
@@ -2958,7 +3012,7 @@ function Reports() {
           isOpen={showPreview}
           onClose={() => setShowPreview(false)}
           title={`Print Preview - ${selectedReport}`}
-          size="xl"
+          size="full"
           actions={[
             {
               label: 'Print Now',

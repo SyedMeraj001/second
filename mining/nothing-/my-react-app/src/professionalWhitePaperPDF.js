@@ -154,7 +154,8 @@ export const generateProfessionalWhitePaper = async (framework, inputData, optio
   if (!Array.isArray(data)) throw new Error('Data must be an array of ESG metrics');
   if (!framework || typeof framework !== 'string') throw new Error('Framework must be a valid string (GRI, SASB, TCFD)');
 
-  const pdf = new jsPDF();
+  // Use wider format for better preview (A4 landscape or custom width)
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [240, 297] });
   const normalizedData = normalizeData(data);
   
   // Extract chart images from options if provided
