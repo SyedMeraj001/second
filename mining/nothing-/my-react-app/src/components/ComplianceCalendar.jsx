@@ -8,8 +8,16 @@ const ComplianceCalendar = ({ onClose }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState('month');
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [showAddEvent, setShowAddEvent] = useState(false);
+  const [newEvent, setNewEvent] = useState({
+    title: '',
+    date: '',
+    type: 'deadline',
+    framework: 'GRI',
+    description: ''
+  });
 
-  const complianceEvents = [
+  const [complianceEvents, setComplianceEvents] = useState([
     { id: 1, title: 'GRI Report Submission', date: '2025-01-15', type: 'deadline', framework: 'GRI', status: 'upcoming' },
     { id: 2, title: 'BRSR Annual Filing', date: '2025-01-30', type: 'deadline', framework: 'BRSR', status: 'upcoming' },
     { id: 3, title: 'Carbon Emissions Data Collection', date: '2025-02-10', type: 'task', framework: 'GHG', status: 'pending' },
@@ -18,7 +26,7 @@ const ComplianceCalendar = ({ onClose }) => {
     { id: 6, title: 'Sustainability Audit', date: '2025-03-20', type: 'audit', framework: 'ISO 14001', status: 'scheduled' },
     { id: 7, title: 'Quarterly ESG Data Review', date: '2025-03-31', type: 'review', framework: 'Internal', status: 'recurring' },
     { id: 8, title: 'SASB Disclosure Deadline', date: '2025-04-15', type: 'deadline', framework: 'SASB', status: 'upcoming' },
-  ];
+  ]);
 
   const getDaysInMonth = (date) => {
     const year = date.getFullYear();
@@ -111,6 +119,19 @@ const ComplianceCalendar = ({ onClose }) => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + delta, 1));
   };
 
+  const handleAddEvent = () => {
+    if (newEvent.title && newEvent.date) {
+      const event = {
+        id: Date.now(),
+        ...newEvent,
+        status: 'upcoming'
+      };
+      setComplianceEvents([...complianceEvents, event]);
+      setNewEvent({ title: '', date: '', type: 'deadline', framework: 'GRI', description: '' });
+      setShowAddEvent(false);
+    }
+  };
+
   const upcomingEvents = complianceEvents
     .filter(e => new Date(e.date) >= new Date())
     .sort((a, b) => new Date(a.date) - new Date(b.date))
@@ -170,6 +191,16 @@ const ComplianceCalendar = ({ onClose }) => {
                   <span className="relative z-10 flex items-center gap-2">
                     <span className="text-lg">🎯</span>
                     Today
+                  </span>
+                  <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                </button>
+                <button
+                  onClick={() => setShowAddEvent(true)}
+                  className="relative px-6 py-3 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 text-white rounded-xl hover:from-blue-600 hover:via-indigo-600 hover:to-purple-600 shadow-lg hover:shadow-xl transition-all duration-300 font-bold group overflow-hidden"
+                >
+                  <span className="relative z-10 flex items-center gap-2">
+                    <span className="text-lg">➕</span>
+                    Add Event
                   </span>
                   <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                 </button>
@@ -269,6 +300,105 @@ const ComplianceCalendar = ({ onClose }) => {
           </div>
         </div>
       </div>
+
+      {/* Add Event Modal */}
+      {showAddEvent && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60">
+          <div className={`max-w-md w-full mx-4 ${theme.bg.card} rounded-xl shadow-2xl border ${theme.border.primary}`}>
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className={`text-xl font-bold ${theme.text.primary} flex items-center gap-2`}>
+                  <span className="text-2xl">➕</span>
+                  Add New Event
+                </h3>
+                <button onClick={() => setShowAddEvent(false)} className="text-gray-500 hover:text-gray-700">✕</button>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className={`block text-sm font-medium ${theme.text.secondary} mb-1`}>Event Title</label>
+                  <input
+                    type="text"
+                    value={newEvent.title}
+                    onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
+                    className={`w-full px-3 py-2 border rounded-lg ${theme.bg.input} ${theme.border.input} ${theme.text.primary} focus:ring-2 focus:ring-blue-500`}
+                    placeholder="Enter event title"
+                  />
+                </div>
+                
+                <div>
+                  <label className={`block text-sm font-medium ${theme.text.secondary} mb-1`}>Date</label>
+                  <input
+                    type="date"
+                    value={newEvent.date}
+                    onChange={(e) => setNewEvent({ ...newEvent, date: e.target.value })}
+                    className={`w-full px-3 py-2 border rounded-lg ${theme.bg.input} ${theme.border.input} ${theme.text.primary} focus:ring-2 focus:ring-blue-500`}
+                  />
+                </div>
+                
+                <div>
+                  <label className={`block text-sm font-medium ${theme.text.secondary} mb-1`}>Event Type</label>
+                  <select
+                    value={newEvent.type}
+                    onChange={(e) => setNewEvent({ ...newEvent, type: e.target.value })}
+                    className={`w-full px-3 py-2 border rounded-lg ${theme.bg.input} ${theme.border.input} ${theme.text.primary} focus:ring-2 focus:ring-blue-500`}
+                  >
+                    <option value="deadline">Deadline</option>
+                    <option value="task">Task</option>
+                    <option value="meeting">Meeting</option>
+                    <option value="audit">Audit</option>
+                    <option value="review">Review</option>
+                    <option value="reminder">Reminder</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className={`block text-sm font-medium ${theme.text.secondary} mb-1`}>Framework</label>
+                  <select
+                    value={newEvent.framework}
+                    onChange={(e) => setNewEvent({ ...newEvent, framework: e.target.value })}
+                    className={`w-full px-3 py-2 border rounded-lg ${theme.bg.input} ${theme.border.input} ${theme.text.primary} focus:ring-2 focus:ring-blue-500`}
+                  >
+                    <option value="GRI">GRI</option>
+                    <option value="BRSR">BRSR</option>
+                    <option value="TCFD">TCFD</option>
+                    <option value="SASB">SASB</option>
+                    <option value="ISSB">ISSB</option>
+                    <option value="Internal">Internal</option>
+                    <option value="Custom">Custom</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className={`block text-sm font-medium ${theme.text.secondary} mb-1`}>Description (Optional)</label>
+                  <textarea
+                    value={newEvent.description}
+                    onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
+                    className={`w-full px-3 py-2 border rounded-lg ${theme.bg.input} ${theme.border.input} ${theme.text.primary} focus:ring-2 focus:ring-blue-500`}
+                    rows="3"
+                    placeholder="Enter event description"
+                  />
+                </div>
+              </div>
+              
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setShowAddEvent(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAddEvent}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Add Event
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

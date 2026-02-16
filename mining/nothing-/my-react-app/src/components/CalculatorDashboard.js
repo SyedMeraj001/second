@@ -275,12 +275,30 @@ const CalculatorDashboard = () => {
     <div className="p-6">
       <div className="max-w-7xl mx-auto">
         <div className={`mb-6 p-6 rounded-xl shadow-lg ${theme.bg.card}`}>
-          <h1 className={`text-2xl font-bold ${theme.text.primary}`}>
-            ESG Calculator Dashboard
-          </h1>
-          <p className={`text-sm ${theme.text.secondary} mt-1`}>
-            Test and validate specialized ESG calculators
-          </p>
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className={`text-2xl font-bold ${theme.text.primary}`}>
+                ESG Calculator Dashboard
+              </h1>
+              <p className={`text-sm ${theme.text.secondary} mt-1`}>
+                Test and validate specialized ESG calculators
+              </p>
+            </div>
+            <button
+              onClick={() => window.history.back()}
+              className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 hover:scale-105 ${
+                isDark 
+                  ? 'bg-gray-700 hover:bg-gray-600 text-white border border-gray-600' 
+                  : 'bg-white/70 hover:bg-white/90 text-gray-700 border border-white/30 shadow-lg'
+              }`}
+              style={{
+                backdropFilter: 'blur(10px)',
+                boxShadow: isDark ? '' : '0 8px 32px rgba(0, 0, 0, 0.1)'
+              }}
+            >
+              ← Back
+            </button>
+          </div>
           
           {/* Data Source Toggle */}
           <div className={`mt-4 p-4 rounded-lg ${theme.bg.subtle}`}>

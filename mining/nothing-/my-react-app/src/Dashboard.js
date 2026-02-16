@@ -4,7 +4,19 @@ import { useTheme } from "./contexts/ThemeContext";
 import { MetricCard, StatusCard } from "./components/ProfessionalCard";
 import ProfessionalHeader from "./components/ProfessionalHeader";
 
-// Simplified imports to prevent loading issues
+import PredictiveForecastingDashboard from "./components/PredictiveForecastingDashboard";
+import AIInsightsPanel from "./components/AIInsightsPanel";
+import EnhancedScenarioModelling from "./components/EnhancedScenarioModelling";
+import EUTaxonomyNavigator from "./components/EUTaxonomyNavigator";
+import AlertCenter from "./components/AlertCenter";
+import EnterpriseRiskHeatmap from "./components/EnterpriseRiskHeatmap";
+import CustomTaxonomyBuilder from "./components/CustomTaxonomyBuilder";
+import AdvancedBenchmarking from "./components/AdvancedBenchmarking";
+import ComplianceCalendar from "./components/ComplianceCalendar";
+import AuditTrailViewer from "./components/AuditTrailViewer";
+import EvidenceUploader from "./components/EvidenceUploader";
+import ComplianceReports from "./components/ComplianceReports";
+import SupportTicketing from "./components/SupportTicketing";
 const ModuleAPI = {
   calculateKPIs: () => Promise.resolve({
     success: true,
@@ -323,10 +335,10 @@ function Dashboard() {
     }`} style={{
       backgroundImage: isDark ? '' : 'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.12) 0%, transparent 50%), radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.1) 0%, transparent 50%)'
     }}>
-      <ProfessionalHeader 
+      {/* <ProfessionalHeader 
         onLogout={handleLogout}
         currentUser={currentUser}
-      />
+      /> */}
 
 
       {/* Main Content */}
@@ -486,35 +498,35 @@ function Dashboard() {
                 
                 {showAdvancedActions && (
                   <div className="mt-3 space-y-2 animate-fade-in">
-                    <div onClick={() => navigate('/advanced-analytics')} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                    <div onClick={() => setShowForecasting(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
                       isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
                     }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">📈</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Predictive Forecasting</span>
                       <span className="ml-auto text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-semibold">NEW</span>
                     </div>
-                    <div onClick={() => navigate('/ai-insights')} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                    <div onClick={() => setShowAIInsights(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
                       isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
                     }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">🤖</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>AI Insights</span>
                       <span className="ml-auto text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-semibold">NEW</span>
                     </div>
-                    <div onClick={() => navigate('/scenario-modeling')} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                    <div onClick={() => setShowEnhancedScenarios(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
                       isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
                     }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">🎯</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Scenario Modeling</span>
                       <span className="ml-auto text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full font-semibold">ADVANCED</span>
                     </div>
-                    <div onClick={() => navigate('/taxonomy')} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                    <div onClick={() => setShowEUTaxonomy(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
                       isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
                     }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">🇪🇺</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>EU Taxonomy</span>
                       <span className="ml-auto text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-semibold">PHASE 2</span>
                     </div>
-                    <div onClick={() => navigate('/alerts')} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                    <div onClick={() => setShowAlertCenter(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
                       isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
                     }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">🔔</span>
@@ -566,50 +578,56 @@ function Dashboard() {
                 
                 {showQuickTools && (
                   <div className="mt-3 space-y-2 animate-fade-in">
-                    <div onClick={() => navigate('/risk-management')} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                    <div onClick={() => setShowRiskHeatmap(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
                       isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
                     }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">🔥</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Risk Heatmap</span>
                     </div>
-                    <div onClick={() => navigate('/taxonomy')} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                    <div onClick={() => setShowTaxonomy(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
                       isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
                     }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">⚙️</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Custom Taxonomy</span>
                     </div>
-                    <div onClick={() => navigate('/benchmarking')} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                    <div onClick={() => setShowBenchmarking(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
                       isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
                     }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">📊</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Benchmarking</span>
                     </div>
-                    <div onClick={() => navigate('/compliance')} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                    <div onClick={() => setShowCalendar(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
                       isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
                     }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">📅</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Compliance Calendar</span>
                     </div>
 
-                    <div onClick={() => navigate('/audit')} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                    <div onClick={() => setShowAudit(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
                       isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
                     }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">📋</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Audit Trail</span>
                     </div>
-                    <div onClick={() => navigate('/evidence-upload')} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                    <div onClick={() => setShowWorkflow(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                      isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
+                    }`}>
+                      <span className="text-lg group-hover:scale-110 transition-transform duration-200">✅</span>
+                      <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Workflows</span>
+                    </div>
+                    <div onClick={() => setShowEvidence(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
                       isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
                     }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">📁</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Evidence Upload</span>
                     </div>
-                    <div onClick={() => navigate('/reports')} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                    <div onClick={() => setShowComplianceReports(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
                       isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
                     }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">📊</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Compliance Reports</span>
                     </div>
-                    <div onClick={() => navigate('/support')} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                    <div onClick={() => setShowSupport(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
                       isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
                     }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">🎫</span>
@@ -713,22 +731,19 @@ function Dashboard() {
 
       {/* Component Modals */}
       {showEnhancedEntry && <ComponentPlaceholder name="Enhanced Data Entry" onClose={() => setShowEnhancedEntry(false)} />}
-      {showForecasting && <ComponentPlaceholder name="Predictive Forecasting" onClose={() => setShowForecasting(false)} />}
-      {showAIInsights && <ComponentPlaceholder name="AI Insights" onClose={() => setShowAIInsights(false)} />}
-      {showEnhancedScenarios && <ComponentPlaceholder name="Scenario Modeling" onClose={() => setShowEnhancedScenarios(false)} />}
-      {showEUTaxonomy && <ComponentPlaceholder name="EU Taxonomy" onClose={() => setShowEUTaxonomy(false)} />}
-      {showCDPWizard && <ComponentPlaceholder name="CDP Wizard" onClose={() => setShowCDPWizard(false)} />}
-      {showAlertCenter && <ComponentPlaceholder name="Alert Center" onClose={() => setShowAlertCenter(false)} />}
-      {showRiskHeatmap && <ComponentPlaceholder name="Risk Heatmap" onClose={() => setShowRiskHeatmap(false)} />}
-      {showTaxonomy && <ComponentPlaceholder name="Custom Taxonomy" onClose={() => setShowTaxonomy(false)} />}
-      {showReminders && <ComponentPlaceholder name="Reminders" onClose={() => setShowReminders(false)} />}
-      {showBenchmarking && <ComponentPlaceholder name="Benchmarking" onClose={() => setShowBenchmarking(false)} />}
-      {showCalendar && <ComponentPlaceholder name="Compliance Calendar" onClose={() => setShowCalendar(false)} />}
-      {showAudit && <ComponentPlaceholder name="Audit Trail" onClose={() => setShowAudit(false)} />}
-      {showWorkflow && <ComponentPlaceholder name="Workflow Dashboard" onClose={() => setShowWorkflow(false)} />}
-      {showEvidence && <ComponentPlaceholder name="Evidence Uploader" onClose={() => setShowEvidence(false)} />}
-      {showComplianceReports && <ComponentPlaceholder name="Compliance Reports" onClose={() => setShowComplianceReports(false)} />}
-      {showSupport && <ComponentPlaceholder name="Support Ticketing" onClose={() => setShowSupport(false)} />}
+      {showForecasting && <PredictiveForecastingDashboard onClose={() => setShowForecasting(false)} />}
+      {showAIInsights && <AIInsightsPanel onClose={() => setShowAIInsights(false)} />}
+      {showEnhancedScenarios && <EnhancedScenarioModelling onClose={() => setShowEnhancedScenarios(false)} />}
+      {showEUTaxonomy && <EUTaxonomyNavigator onClose={() => setShowEUTaxonomy(false)} />}
+      {showAlertCenter && <AlertCenter onClose={() => setShowAlertCenter(false)} />}
+      {showRiskHeatmap && <EnterpriseRiskHeatmap onClose={() => setShowRiskHeatmap(false)} />}
+      {showTaxonomy && <CustomTaxonomyBuilder onClose={() => setShowTaxonomy(false)} />}
+      {showBenchmarking && <AdvancedBenchmarking onClose={() => setShowBenchmarking(false)} />}
+      {showCalendar && <ComplianceCalendar onClose={() => setShowCalendar(false)} />}
+      {showAudit && <AuditTrailViewer onClose={() => setShowAudit(false)} />}
+      {showEvidence && <EvidenceUploader onClose={() => setShowEvidence(false)} />}
+      {showComplianceReports && <ComplianceReports onClose={() => setShowComplianceReports(false)} />}
+      {showSupport && <SupportTicketing onClose={() => setShowSupport(false)} />}
     </div>
   );
 }

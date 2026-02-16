@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { getThemeClasses } from '../../utils/themeUtils';
-import { saveData } from '../../utils/storage';
+import { saveData } from '../../utils/storageSimple';
 import { useTranslation } from 'react-i18next';
 
 const BoardManagementForm = ({ onSave, onClose }) => {

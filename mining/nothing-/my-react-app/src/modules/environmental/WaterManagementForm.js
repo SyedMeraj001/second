@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { getThemeClasses } from '../../utils/themeUtils';
-import { saveData } from '../../utils/storage';
+import { saveData } from '../../utils/storageSimple';
 
 const WaterManagementForm = ({ onSave, onClose }) => {
   const { isDark } = useTheme();

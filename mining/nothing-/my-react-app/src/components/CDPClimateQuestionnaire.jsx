@@ -285,12 +285,30 @@ const CDPClimateQuestionnaire = () => {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className={`text-3xl font-bold ${theme.text.primary}`}>
-            CDP Climate Change Questionnaire 2024
-          </h1>
-          <p className={`text-lg ${theme.text.secondary}`}>
-            Complete your climate disclosure for investor and stakeholder transparency
-          </p>
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className={`text-3xl font-bold ${theme.text.primary}`}>
+                CDP Climate Change Questionnaire 2024
+              </h1>
+              <p className={`text-lg ${theme.text.secondary}`}>
+                Complete your climate disclosure for investor and stakeholder transparency
+              </p>
+            </div>
+            <button
+              onClick={() => window.history.back()}
+              className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 hover:scale-105 ${
+                isDark 
+                  ? 'bg-gray-700 hover:bg-gray-600 text-white border border-gray-600' 
+                  : 'bg-white/70 hover:bg-white/90 text-gray-700 border border-white/30 shadow-lg'
+              }`}
+              style={{
+                backdropFilter: 'blur(10px)',
+                boxShadow: isDark ? '' : '0 8px 32px rgba(0, 0, 0, 0.1)'
+              }}
+            >
+              ← Back
+            </button>
+          </div>
         </div>
 
         {/* Progress Overview */}
