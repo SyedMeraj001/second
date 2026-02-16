@@ -143,25 +143,6 @@ const UserManagement = () => {
     }
   };
 
-  const getRoleStats = () => {
-    const stats = {
-      [USER_ROLES.SUPER_ADMIN]: 0,
-      [USER_ROLES.SUPERVISOR]: 0,
-      [USER_ROLES.DATA_ENTRY]: 0,
-      total: users.length
-    };
-
-    users.forEach(user => {
-      if (stats[user.role] !== undefined) {
-        stats[user.role]++;
-      }
-    });
-
-    return stats;
-  };
-
-  const stats = getRoleStats();
-
   if (!hasPermission(userRole, PERMISSIONS.MANAGE_USERS)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -177,7 +158,6 @@ const UserManagement = () => {
   return (
     <div className={`min-h-screen p-6 ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
         <div className="mb-6 flex justify-between items-start">
           <div>
             <h1 className={`text-3xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
@@ -195,50 +175,6 @@ const UserManagement = () => {
           </button>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className={`p-4 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-white'} shadow`}>
-            <div className="text-2xl mb-2">👤</div>
-            <div className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-              {stats.total}
-            </div>
-            <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              Total Users
-            </div>
-          </div>
-
-          <div className={`p-4 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-white'} shadow`}>
-            <div className="text-2xl mb-2">🔴</div>
-            <div className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-              {stats[USER_ROLES.SUPER_ADMIN]}
-            </div>
-            <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              Super Admins
-            </div>
-          </div>
-
-          <div className={`p-4 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-white'} shadow`}>
-            <div className="text-2xl mb-2">🔵</div>
-            <div className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-              {stats[USER_ROLES.SUPERVISOR]}
-            </div>
-            <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              Supervisors
-            </div>
-          </div>
-
-          <div className={`p-4 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-white'} shadow`}>
-            <div className="text-2xl mb-2">🟢</div>
-            <div className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-              {stats[USER_ROLES.DATA_ENTRY]}
-            </div>
-            <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              Data Entry Users
-            </div>
-          </div>
-        </div>
-
-        {/* Filters and Actions */}
         <div className={`p-4 rounded-lg mb-6 ${isDark ? 'bg-gray-800' : 'bg-white'} shadow`}>
           <div className="flex flex-col md:flex-row gap-4">
             <input
@@ -277,7 +213,6 @@ const UserManagement = () => {
           </div>
         </div>
 
-        {/* Users Table */}
         <div className={`rounded-lg shadow overflow-hidden ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -356,7 +291,6 @@ const UserManagement = () => {
           </div>
         </div>
 
-        {/* Add User Modal */}
         {showAddUser && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className={`p-6 rounded-lg shadow-xl max-w-md w-full ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
