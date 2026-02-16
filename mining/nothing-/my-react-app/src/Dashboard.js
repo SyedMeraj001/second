@@ -429,8 +429,7 @@ function Dashboard() {
                       { icon: '✓', label: 'Compliance', link: '/compliance' },
                       { icon: '👥', label: 'Stakeholders', link: '/stakeholders' },
                       { icon: '📋', label: 'Stakeholder Surveys', link: '/stakeholder-surveys' },
-                      { icon: '⚖️', label: 'Regulatory', link: '/regulatory' },
-                      { icon: '🔄', label: 'Workflow & Approval', link: '/workflow' }
+                      { icon: '⚖️', label: 'Regulatory', link: '/regulatory' }
                     ].map((action, index) => (
                       <Link key={index} to={action.link} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
                         isDark 
