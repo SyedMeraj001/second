@@ -961,12 +961,13 @@ const createFutureTrends = (pdf, config) => {
 
 const createEnvironmentalModuleReport = (pdf, config) => {
   const { colors, realTimeData } = config;
-  const envData = realTimeData?.modules?.environmental || {
+  const fallbackData = {
     carbon: { scope1: 1200, scope2: 800, scope3: 3500, total: 5500 },
     water: { consumption: 125000, efficiency: 85 },
     waste: { total: 450, recycled: 320, recyclingRate: 71 },
     air: { pm25: 12, nox: 45, sox: 23 }
   };
+  const envData = realTimeData?.modules?.environmental || fallbackData;
   
   createAdvancedSectionHeader(pdf, 'ENVIRONMENTAL PERFORMANCE DETAILS', colors);
   
@@ -977,45 +978,46 @@ const createEnvironmentalModuleReport = (pdf, config) => {
   pdf.text('Carbon Footprint', 25, yPos);
   pdf.setTextColor(...colors.text); pdf.setFontSize(9); pdf.setFont('helvetica', 'normal');
   yPos += 10;
-  pdf.text(`Scope 1: ${envData.carbon.scope1} tCO2e`, 30, yPos); yPos += 8;
-  pdf.text(`Scope 2: ${envData.carbon.scope2} tCO2e`, 30, yPos); yPos += 8;
-  pdf.text(`Scope 3: ${envData.carbon.scope3} tCO2e`, 30, yPos); yPos += 8;
-  pdf.text(`Total: ${envData.carbon.total} tCO2e`, 30, yPos); yPos += 15;
+  pdf.text(`Scope 1: ${(envData.carbon || fallbackData.carbon).scope1} tCO2e`, 30, yPos); yPos += 8;
+  pdf.text(`Scope 2: ${(envData.carbon || fallbackData.carbon).scope2} tCO2e`, 30, yPos); yPos += 8;
+  pdf.text(`Scope 3: ${(envData.carbon || fallbackData.carbon).scope3} tCO2e`, 30, yPos); yPos += 8;
+  pdf.text(`Total: ${(envData.carbon || fallbackData.carbon).total} tCO2e`, 30, yPos); yPos += 15;
   
   // Water Management
   pdf.setTextColor(...colors.primary); pdf.setFontSize(11); pdf.setFont('helvetica', 'bold');
   pdf.text('Water Management', 25, yPos);
   pdf.setTextColor(...colors.text); pdf.setFontSize(9); pdf.setFont('helvetica', 'normal');
   yPos += 10;
-  pdf.text(`Consumption: ${envData.water.consumption.toLocaleString()} m³`, 30, yPos); yPos += 8;
-  pdf.text(`Efficiency: ${envData.water.efficiency}%`, 30, yPos); yPos += 15;
+  pdf.text(`Consumption: ${((envData.water || fallbackData.water).consumption).toLocaleString()} m³`, 30, yPos); yPos += 8;
+  pdf.text(`Efficiency: ${(envData.water || fallbackData.water).efficiency}%`, 30, yPos); yPos += 15;
   
   // Waste Management
   pdf.setTextColor(...colors.primary); pdf.setFontSize(11); pdf.setFont('helvetica', 'bold');
   pdf.text('Waste Management', 25, yPos);
   pdf.setTextColor(...colors.text); pdf.setFontSize(9); pdf.setFont('helvetica', 'normal');
   yPos += 10;
-  pdf.text(`Total Waste: ${envData.waste.total} tons`, 30, yPos); yPos += 8;
-  pdf.text(`Recycled: ${envData.waste.recycled} tons`, 30, yPos); yPos += 8;
-  pdf.text(`Recycling Rate: ${envData.waste.recyclingRate}%`, 30, yPos); yPos += 15;
+  pdf.text(`Total Waste: ${(envData.waste || fallbackData.waste).total} tons`, 30, yPos); yPos += 8;
+  pdf.text(`Recycled: ${(envData.waste || fallbackData.waste).recycled} tons`, 30, yPos); yPos += 8;
+  pdf.text(`Recycling Rate: ${(envData.waste || fallbackData.waste).recyclingRate}%`, 30, yPos); yPos += 15;
   
   // Air Quality
   pdf.setTextColor(...colors.primary); pdf.setFontSize(11); pdf.setFont('helvetica', 'bold');
   pdf.text('Air Quality Control', 25, yPos);
   pdf.setTextColor(...colors.text); pdf.setFontSize(9); pdf.setFont('helvetica', 'normal');
   yPos += 10;
-  pdf.text(`PM2.5: ${envData.air.pm25} μg/m³`, 30, yPos); yPos += 8;
-  pdf.text(`NOx: ${envData.air.nox} ppm`, 30, yPos); yPos += 8;
-  pdf.text(`SOx: ${envData.air.sox} ppm`, 30, yPos);
+  pdf.text(`PM2.5: ${(envData.air || fallbackData.air).pm25} μg/m³`, 30, yPos); yPos += 8;
+  pdf.text(`NOx: ${(envData.air || fallbackData.air).nox} ppm`, 30, yPos); yPos += 8;
+  pdf.text(`SOx: ${(envData.air || fallbackData.air).sox} ppm`, 30, yPos);
 };
 
 const createSocialModuleReport = (pdf, config) => {
   const { colors, realTimeData } = config;
-  const socialData = realTimeData?.modules?.social || {
+  const fallbackData = {
     workforce: { total: 1250, diversity: 42, turnover: 8.5 },
     healthSafety: { incidents: 3, ltir: 0.12, trainingHours: 24500 },
     community: { investment: 250000, beneficiaries: 5000 }
   };
+  const socialData = realTimeData?.modules?.social || fallbackData;
   
   createAdvancedSectionHeader(pdf, 'SOCIAL PERFORMANCE DETAILS', colors);
   
@@ -1026,35 +1028,36 @@ const createSocialModuleReport = (pdf, config) => {
   pdf.text('Workforce Management', 25, yPos);
   pdf.setTextColor(...colors.text); pdf.setFontSize(9); pdf.setFont('helvetica', 'normal');
   yPos += 10;
-  pdf.text(`Total Employees: ${socialData.workforce.total}`, 30, yPos); yPos += 8;
-  pdf.text(`Diversity: ${socialData.workforce.diversity}%`, 30, yPos); yPos += 8;
-  pdf.text(`Turnover Rate: ${socialData.workforce.turnover}%`, 30, yPos); yPos += 15;
+  pdf.text(`Total Employees: ${(socialData.workforce || fallbackData.workforce).total}`, 30, yPos); yPos += 8;
+  pdf.text(`Diversity: ${(socialData.workforce || fallbackData.workforce).diversity}%`, 30, yPos); yPos += 8;
+  pdf.text(`Turnover Rate: ${(socialData.workforce || fallbackData.workforce).turnover}%`, 30, yPos); yPos += 15;
   
   // Health & Safety
   pdf.setTextColor(...colors.secondary); pdf.setFontSize(11); pdf.setFont('helvetica', 'bold');
   pdf.text('Health & Safety', 25, yPos);
   pdf.setTextColor(...colors.text); pdf.setFontSize(9); pdf.setFont('helvetica', 'normal');
   yPos += 10;
-  pdf.text(`Incidents: ${socialData.healthSafety.incidents}`, 30, yPos); yPos += 8;
-  pdf.text(`LTIR: ${socialData.healthSafety.ltir}`, 30, yPos); yPos += 8;
-  pdf.text(`Training Hours: ${socialData.healthSafety.trainingHours.toLocaleString()}`, 30, yPos); yPos += 15;
+  pdf.text(`Incidents: ${(socialData.healthSafety || fallbackData.healthSafety).incidents}`, 30, yPos); yPos += 8;
+  pdf.text(`LTIR: ${(socialData.healthSafety || fallbackData.healthSafety).ltir}`, 30, yPos); yPos += 8;
+  pdf.text(`Training Hours: ${((socialData.healthSafety || fallbackData.healthSafety).trainingHours).toLocaleString()}`, 30, yPos); yPos += 15;
   
   // Community
   pdf.setTextColor(...colors.secondary); pdf.setFontSize(11); pdf.setFont('helvetica', 'bold');
   pdf.text('Community Engagement', 25, yPos);
   pdf.setTextColor(...colors.text); pdf.setFontSize(9); pdf.setFont('helvetica', 'normal');
   yPos += 10;
-  pdf.text(`Investment: $${socialData.community.investment.toLocaleString()}`, 30, yPos); yPos += 8;
-  pdf.text(`Beneficiaries: ${socialData.community.beneficiaries.toLocaleString()}`, 30, yPos);
+  pdf.text(`Investment: $${((socialData.community || fallbackData.community).investment).toLocaleString()}`, 30, yPos); yPos += 8;
+  pdf.text(`Beneficiaries: ${((socialData.community || fallbackData.community).beneficiaries).toLocaleString()}`, 30, yPos);
 };
 
 const createGovernanceModuleReport = (pdf, config) => {
   const { colors, realTimeData } = config;
-  const govData = realTimeData?.modules?.governance || {
+  const fallbackData = {
     board: { independence: 75, diversity: 40, meetings: 12 },
     ethics: { trainingCompletion: 98, violations: 0 },
     privacy: { breaches: 0, complianceScore: 95 }
   };
+  const govData = realTimeData?.modules?.governance || fallbackData;
   
   createAdvancedSectionHeader(pdf, 'GOVERNANCE PERFORMANCE DETAILS', colors);
   
@@ -1065,34 +1068,35 @@ const createGovernanceModuleReport = (pdf, config) => {
   pdf.text('Board Leadership', 25, yPos);
   pdf.setTextColor(...colors.text); pdf.setFontSize(9); pdf.setFont('helvetica', 'normal');
   yPos += 10;
-  pdf.text(`Independence: ${govData.board.independence}%`, 30, yPos); yPos += 8;
-  pdf.text(`Diversity: ${govData.board.diversity}%`, 30, yPos); yPos += 8;
-  pdf.text(`Meetings: ${govData.board.meetings}`, 30, yPos); yPos += 15;
+  pdf.text(`Independence: ${(govData.board || fallbackData.board).independence}%`, 30, yPos); yPos += 8;
+  pdf.text(`Diversity: ${(govData.board || fallbackData.board).diversity}%`, 30, yPos); yPos += 8;
+  pdf.text(`Meetings: ${(govData.board || fallbackData.board).meetings}`, 30, yPos); yPos += 15;
   
   // Ethics
   pdf.setTextColor(...colors.accent); pdf.setFontSize(11); pdf.setFont('helvetica', 'bold');
   pdf.text('Ethics & Anti-Corruption', 25, yPos);
   pdf.setTextColor(...colors.text); pdf.setFontSize(9); pdf.setFont('helvetica', 'normal');
   yPos += 10;
-  pdf.text(`Training Completion: ${govData.ethics.trainingCompletion}%`, 30, yPos); yPos += 8;
-  pdf.text(`Violations: ${govData.ethics.violations}`, 30, yPos); yPos += 15;
+  pdf.text(`Training Completion: ${(govData.ethics || fallbackData.ethics).trainingCompletion}%`, 30, yPos); yPos += 8;
+  pdf.text(`Violations: ${(govData.ethics || fallbackData.ethics).violations}`, 30, yPos); yPos += 15;
   
   // Privacy
   pdf.setTextColor(...colors.accent); pdf.setFontSize(11); pdf.setFont('helvetica', 'bold');
   pdf.text('Data Privacy & Cybersecurity', 25, yPos);
   pdf.setTextColor(...colors.text); pdf.setFontSize(9); pdf.setFont('helvetica', 'normal');
   yPos += 10;
-  pdf.text(`Breaches: ${govData.privacy.breaches}`, 30, yPos); yPos += 8;
-  pdf.text(`Compliance Score: ${govData.privacy.complianceScore}%`, 30, yPos);
+  pdf.text(`Breaches: ${(govData.privacy || fallbackData.privacy).breaches}`, 30, yPos); yPos += 8;
+  pdf.text(`Compliance Score: ${(govData.privacy || fallbackData.privacy).complianceScore}%`, 30, yPos);
 };
 
 const createCalculatorResults = (pdf, config) => {
   const { colors, realTimeData } = config;
-  const calcData = realTimeData?.modules?.calculators || {
+  const fallbackData = {
     carbonFootprint: { total: 5500, intensity: 2.3 },
     waterStress: { score: 75, risk: 'Medium-High' },
     roi: { totalROI: 28, payback: 2.1 }
   };
+  const calcData = realTimeData?.modules?.calculators || fallbackData;
   
   createAdvancedSectionHeader(pdf, 'CALCULATOR RESULTS & ANALYSIS', colors);
   
@@ -1103,24 +1107,24 @@ const createCalculatorResults = (pdf, config) => {
   pdf.text('Carbon Footprint Analysis', 25, yPos);
   pdf.setTextColor(...colors.text); pdf.setFontSize(9); pdf.setFont('helvetica', 'normal');
   yPos += 10;
-  pdf.text(`Total Emissions: ${calcData.carbonFootprint.total} tCO2e`, 30, yPos); yPos += 8;
-  pdf.text(`Intensity: ${calcData.carbonFootprint.intensity} tCO2e/unit`, 30, yPos); yPos += 15;
+  pdf.text(`Total Emissions: ${(calcData.carbonFootprint || fallbackData.carbonFootprint).total} tCO2e`, 30, yPos); yPos += 8;
+  pdf.text(`Intensity: ${(calcData.carbonFootprint || fallbackData.carbonFootprint).intensity} tCO2e/unit`, 30, yPos); yPos += 15;
   
   // Water Stress
   pdf.setTextColor(...colors.blue); pdf.setFontSize(11); pdf.setFont('helvetica', 'bold');
   pdf.text('Water Stress Assessment', 25, yPos);
   pdf.setTextColor(...colors.text); pdf.setFontSize(9); pdf.setFont('helvetica', 'normal');
   yPos += 10;
-  pdf.text(`Stress Score: ${calcData.waterStress.score}`, 30, yPos); yPos += 8;
-  pdf.text(`Risk Level: ${calcData.waterStress.risk}`, 30, yPos); yPos += 15;
+  pdf.text(`Stress Score: ${(calcData.waterStress || fallbackData.waterStress).score}`, 30, yPos); yPos += 8;
+  pdf.text(`Risk Level: ${(calcData.waterStress || fallbackData.waterStress).risk}`, 30, yPos); yPos += 15;
   
   // ESG ROI
   pdf.setTextColor(...colors.blue); pdf.setFontSize(11); pdf.setFont('helvetica', 'bold');
   pdf.text('ESG ROI Analysis', 25, yPos);
   pdf.setTextColor(...colors.text); pdf.setFontSize(9); pdf.setFont('helvetica', 'normal');
   yPos += 10;
-  pdf.text(`Total ROI: ${calcData.roi.totalROI}%`, 30, yPos); yPos += 8;
-  pdf.text(`Payback Period: ${calcData.roi.payback} years`, 30, yPos);
+  pdf.text(`Total ROI: ${(calcData.roi || fallbackData.roi).totalROI}%`, 30, yPos); yPos += 8;
+  pdf.text(`Payback Period: ${(calcData.roi || fallbackData.roi).payback} years`, 30, yPos);
 };
 
 const createRecommendations = (pdf, config) => {
