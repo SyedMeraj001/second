@@ -486,35 +486,35 @@ function Dashboard() {
                 
                 {showAdvancedActions && (
                   <div className="mt-3 space-y-2 animate-fade-in">
-                    <div onClick={() => setShowForecasting(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                    <div onClick={() => navigate('/advanced-analytics')} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
                       isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
                     }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">📈</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Predictive Forecasting</span>
                       <span className="ml-auto text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-semibold">NEW</span>
                     </div>
-                    <div onClick={() => setShowAIInsights(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                    <div onClick={() => navigate('/ai-insights')} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
                       isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
                     }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">🤖</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>AI Insights</span>
                       <span className="ml-auto text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-semibold">NEW</span>
                     </div>
-                    <div onClick={() => setShowEnhancedScenarios(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                    <div onClick={() => navigate('/scenario-modeling')} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
                       isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
                     }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">🎯</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Scenario Modeling</span>
                       <span className="ml-auto text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full font-semibold">ADVANCED</span>
                     </div>
-                    <div onClick={() => setShowEUTaxonomy(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                    <div onClick={() => navigate('/taxonomy')} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
                       isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
                     }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">🇪🇺</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>EU Taxonomy</span>
                       <span className="ml-auto text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-semibold">PHASE 2</span>
                     </div>
-                    <div onClick={() => setShowAlertCenter(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                    <div onClick={() => navigate('/alerts')} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
                       isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
                     }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">🔔</span>
@@ -566,50 +566,50 @@ function Dashboard() {
                 
                 {showQuickTools && (
                   <div className="mt-3 space-y-2 animate-fade-in">
-                    <div onClick={() => setShowRiskHeatmap(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                    <div onClick={() => navigate('/risk-management')} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
                       isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
                     }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">🔥</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Risk Heatmap</span>
                     </div>
-                    <div onClick={() => setShowTaxonomy(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                    <div onClick={() => navigate('/taxonomy')} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
                       isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
                     }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">⚙️</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Custom Taxonomy</span>
                     </div>
-                    <div onClick={() => setShowBenchmarking(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                    <div onClick={() => navigate('/benchmarking')} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
                       isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
                     }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">📊</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Benchmarking</span>
                     </div>
-                    <div onClick={() => setShowCalendar(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                    <div onClick={() => navigate('/compliance')} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
                       isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
                     }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">📅</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Compliance Calendar</span>
                     </div>
 
-                    <div onClick={() => setShowAudit(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                    <div onClick={() => navigate('/audit')} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
                       isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
                     }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">📋</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Audit Trail</span>
                     </div>
-                    <div onClick={() => setShowEvidence(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                    <div onClick={() => navigate('/evidence-upload')} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
                       isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
                     }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">📁</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Evidence Upload</span>
                     </div>
-                    <div onClick={() => setShowComplianceReports(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                    <div onClick={() => navigate('/reports')} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
                       isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
                     }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">📊</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Compliance Reports</span>
                     </div>
-                    <div onClick={() => setShowSupport(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                    <div onClick={() => navigate('/support')} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
                       isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
                     }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">🎫</span>
