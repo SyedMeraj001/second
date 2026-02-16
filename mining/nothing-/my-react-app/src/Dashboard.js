@@ -14,6 +14,7 @@ import CustomTaxonomyBuilder from "./components/CustomTaxonomyBuilder";
 import AdvancedBenchmarking from "./components/AdvancedBenchmarking";
 import ComplianceCalendar from "./components/ComplianceCalendar";
 import AuditTrailViewer from "./components/AuditTrailViewer";
+import WorkflowDashboard from "./components/WorkflowDashboard";
 import EvidenceUploader from "./components/EvidenceUploader";
 import ComplianceReports from "./components/ComplianceReports";
 import SupportTicketing from "./components/SupportTicketing";
@@ -741,6 +742,7 @@ function Dashboard() {
       {showBenchmarking && <AdvancedBenchmarking onClose={() => setShowBenchmarking(false)} />}
       {showCalendar && <ComplianceCalendar onClose={() => setShowCalendar(false)} />}
       {showAudit && <AuditTrailViewer onClose={() => setShowAudit(false)} />}
+      {showWorkflow && <WorkflowDashboard onClose={() => setShowWorkflow(false)} />}
       {showEvidence && <EvidenceUploader onClose={() => setShowEvidence(false)} />}
       {showComplianceReports && <ComplianceReports onClose={() => setShowComplianceReports(false)} />}
       {showSupport && <SupportTicketing onClose={() => setShowSupport(false)} />}
