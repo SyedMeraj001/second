@@ -16,11 +16,11 @@ const config = {
   db: {
     useSqlite: process.env.USE_SQLITE === 'true',
     host: process.env.DB_HOST || 'localhost',
-    port: process.env.DB_PORT || 5432,
-    user: process.env.DB_USER || 'postgres',
-    password: process.env.DB_PASSWORD,
-    name: process.env.DB_NAME || 'esg_dashboard',
-    dialect: process.env.USE_SQLITE === 'true' ? 'sqlite' : 'postgres',
+    port: process.env.DB_PORT || 3306,
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '',
+    name: process.env.DB_NAME || 'esg_platform',
+    dialect: process.env.USE_SQLITE === 'true' ? 'sqlite' : (process.env.DB_DIALECT || 'mysql'),
     storage: path.join(__dirname, '../database/database.sqlite') // For SQLite
   },
 
