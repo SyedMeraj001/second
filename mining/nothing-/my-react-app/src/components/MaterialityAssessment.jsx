@@ -128,14 +128,22 @@ const MaterialityAssessment = ({ onSave, onClose }) => {
       }))
     };
     
-    localStorage.setItem('materialityAssessment', JSON.stringify(assessmentData));
-    
-    // Audit trail
-    const currentUser = localStorage.getItem('currentUser') || 'admin@esgenius.com';
-    const materialCount = assessmentData.results.filter(r => r.isMaterial).length;
-    AuditSystem.recordAudit('UPDATE', 'Materiality Assessment', 'materiality_assessment', currentUser, { materialTopics: materialCount, sector: assessmentMetadata.sector });
-    
-    if (onSave) onSave(assessmentData);
+    try {
+      localStorage.setItem('materialityAssessment', JSON.stringify(assessmentData));
+      
+      // Audit trail
+      const currentUser = localStorage.getItem('currentUser') || 'admin@esgenius.com';
+      const materialCount = assessmentData.results.filter(r => r.isMaterial).length;
+      AuditSystem.recordAudit('UPDATE', 'Materiality Assessment', 'materiality_assessment', currentUser, { materialTopics: materialCount, sector: assessmentMetadata.sector });
+      
+      // Show success message
+      alert('✅ Assessment saved successfully!');
+      
+      if (onSave) onSave(assessmentData);
+    } catch (error) {
+      console.error('Save error:', error);
+      alert('❌ Failed to save assessment. Please try again.');
+    }
   };
 
   const renderAssessmentTab = () => (
