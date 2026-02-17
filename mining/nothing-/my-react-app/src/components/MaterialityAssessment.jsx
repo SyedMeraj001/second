@@ -33,7 +33,7 @@ const MaterialityAssessment = ({ onSave, onClose }) => {
   });
   const [assessmentMetadata, setAssessmentMetadata] = useState({
     assessmentDate: new Date().toISOString().split('T')[0],
-    assessor: '',
+    assessor: localStorage.getItem('userFullName') || localStorage.getItem('currentUser') || '',
     reviewedBy: '',
     approvedBy: '',
     nextReviewDate: '',
@@ -158,7 +158,8 @@ const MaterialityAssessment = ({ onSave, onClose }) => {
               type="text"
               value={assessmentMetadata.assessor}
               onChange={(e) => setAssessmentMetadata(prev => ({ ...prev, assessor: e.target.value }))}
-              className={`w-full border rounded px-3 py-2 ${theme.bg.input} ${theme.border.input}`}
+              placeholder="Enter assessor name"
+              className={`w-full border rounded px-3 py-2 ${theme.bg.input} ${theme.border.input} ${theme.text.primary}`}
             />
           </div>
           <div>
