@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { getThemeClasses } from '../utils/themeUtils';
 
-import WaterManagementForm from './environmental/WaterManagementForm';
-import WorkforceManagementForm from './social/WorkforceManagementForm';
-import BoardManagementForm from './governance/BoardManagementForm';
+const WaterManagementForm = lazy(() => import('./environmental/WaterManagementForm'));
+const WorkforceManagementForm = lazy(() => import('./social/WorkforceManagementForm'));
+const BoardManagementForm = lazy(() => import('./governance/BoardManagementForm'));
 
 const UnifiedAdvancedEntry = ({ onClose }) => {
   const { isDark } = useTheme();
   const theme = getThemeClasses(isDark);
-  
+
   const [activeView, setActiveView] = useState('home'); // 'home', 'specialized', 'sector'
   const [selectedModule, setSelectedModule] = useState(null);
   const [activeSectorTab, setActiveSectorTab] = useState('mining');
@@ -107,10 +107,10 @@ const UnifiedAdvancedEntry = ({ onClose }) => {
 
   const handleSectorSave = () => {
     const existing = JSON.parse(localStorage.getItem('advanced_esg_data') || '[]');
-    existing.push({ 
-      ...sectorFormData, 
-      timestamp: new Date().toISOString(), 
-      tab: activeSectorTab 
+    existing.push({
+      ...sectorFormData,
+      timestamp: new Date().toISOString(),
+      tab: activeSectorTab
     });
     localStorage.setItem('advanced_esg_data', JSON.stringify(existing));
     showToast('Sector-specific data saved successfully!', 'success');
@@ -128,10 +128,12 @@ const UnifiedAdvancedEntry = ({ onClose }) => {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className="max-w-6xl w-full max-h-[90vh] overflow-y-auto">
-          <ModuleComponent 
-            onSave={handleModuleSave}
-            onClose={() => setSelectedModule(null)}
-          />
+          <Suspense fallback={<div className="p-10 text-center text-white">Loading Module...</div>}>
+            <ModuleComponent
+              onSave={handleModuleSave}
+              onClose={() => setSelectedModule(null)}
+            />
+          </Suspense>
         </div>
       </div>
     );
@@ -150,8 +152,8 @@ const UnifiedAdvancedEntry = ({ onClose }) => {
               </h2>
               <p className={`text-sm ${theme.text.secondary} mt-1`}>Mining, Zimbabwe compliance, Climate, Investment & Supply Chain</p>
             </div>
-            <button 
-              onClick={() => setActiveView('home')} 
+            <button
+              onClick={() => setActiveView('home')}
               className={`text-2xl ${theme.text.secondary} hover:text-red-600 transition-colors`}
             >
               ←
@@ -164,11 +166,10 @@ const UnifiedAdvancedEntry = ({ onClose }) => {
               <button
                 key={tab.id}
                 onClick={() => setActiveSectorTab(tab.id)}
-                className={`px-4 py-3 rounded-lg whitespace-nowrap transition-all duration-200 ${
-                  activeSectorTab === tab.id
-                    ? 'bg-gradient-to-r from-blue-500 to-green-500 text-white shadow-lg scale-105'
-                    : `${theme.bg.subtle} ${theme.text.secondary} hover:scale-102`
-                }`}
+                className={`px-4 py-3 rounded-lg whitespace-nowrap transition-all duration-200 ${activeSectorTab === tab.id
+                  ? 'bg-gradient-to-r from-blue-500 to-green-500 text-white shadow-lg scale-105'
+                  : `${theme.bg.subtle} ${theme.text.secondary} hover:scale-102`
+                  }`}
               >
                 <div className="flex items-center gap-2">
                   <span className="text-lg">{tab.icon}</span>
@@ -205,21 +206,21 @@ const UnifiedAdvancedEntry = ({ onClose }) => {
 
           {/* Footer */}
           <div className={`p-6 border-t ${theme.border.primary} flex justify-between items-center bg-gray-50 ${isDark ? 'bg-gray-800' : ''}`}>
-            <button 
-              onClick={() => setActiveView('home')} 
+            <button
+              onClick={() => setActiveView('home')}
               className={`px-6 py-2 ${theme.bg.subtle} rounded-lg hover:bg-gray-300 transition-colors`}
             >
               ← Back to Home
             </button>
             <div className="flex gap-3">
-              <button 
-                onClick={() => setSectorFormData({})} 
+              <button
+                onClick={() => setSectorFormData({})}
                 className="px-6 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
               >
                 Clear Form
               </button>
-              <button 
-                onClick={handleSectorSave} 
+              <button
+                onClick={handleSectorSave}
                 className="px-6 py-2 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-lg hover:shadow-lg transition-all"
               >
                 💾 Save Data
@@ -245,7 +246,7 @@ const UnifiedAdvancedEntry = ({ onClose }) => {
                 </h2>
                 <p className={`text-sm ${theme.text.secondary} mt-1`}>Advanced calculators with automated metrics</p>
               </div>
-              <button 
+              <button
                 onClick={() => setActiveView('home')}
                 className={`text-2xl ${theme.text.secondary} hover:text-red-600 transition-colors`}
               >
@@ -268,11 +269,10 @@ const UnifiedAdvancedEntry = ({ onClose }) => {
                         <div
                           key={module.id}
                           onClick={() => setSelectedModule(module)}
-                          className={`p-5 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:scale-102 hover:shadow-lg ${
-                            module.color === 'blue' ? 'border-blue-200 hover:border-blue-400 hover:bg-blue-50' :
+                          className={`p-5 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:scale-102 hover:shadow-lg ${module.color === 'blue' ? 'border-blue-200 hover:border-blue-400 hover:bg-blue-50' :
                             module.color === 'purple' ? 'border-purple-200 hover:border-purple-400 hover:bg-purple-50' :
-                            'border-indigo-200 hover:border-indigo-400 hover:bg-indigo-50'
-                          } ${isDark ? 'hover:bg-opacity-10' : ''} ${theme.bg.card}`}
+                              'border-indigo-200 hover:border-indigo-400 hover:bg-indigo-50'
+                            } ${isDark ? 'hover:bg-opacity-10' : ''} ${theme.bg.card}`}
                         >
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
@@ -283,11 +283,10 @@ const UnifiedAdvancedEntry = ({ onClose }) => {
                                 {module.description}
                               </p>
                               <div className="flex items-center gap-2 flex-wrap">
-                                <span className={`text-xs px-3 py-1 rounded-full font-medium ${
-                                  module.color === 'blue' ? 'bg-blue-100 text-blue-800' :
+                                <span className={`text-xs px-3 py-1 rounded-full font-medium ${module.color === 'blue' ? 'bg-blue-100 text-blue-800' :
                                   module.color === 'purple' ? 'bg-purple-100 text-purple-800' :
-                                  'bg-indigo-100 text-indigo-800'
-                                }`}>
+                                    'bg-indigo-100 text-indigo-800'
+                                  }`}>
                                   {module.category}
                                 </span>
                                 {module.frameworks.map(fw => (
@@ -298,11 +297,10 @@ const UnifiedAdvancedEntry = ({ onClose }) => {
                               </div>
                             </div>
                             <div className="ml-4">
-                              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                                module.color === 'blue' ? 'bg-blue-100' :
+                              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${module.color === 'blue' ? 'bg-blue-100' :
                                 module.color === 'purple' ? 'bg-purple-100' :
-                                'bg-indigo-100'
-                              }`}>
+                                  'bg-indigo-100'
+                                }`}>
                                 <span className="text-xl">→</span>
                               </div>
                             </div>
@@ -342,7 +340,7 @@ const UnifiedAdvancedEntry = ({ onClose }) => {
               </h2>
               <p className={`text-sm ${theme.text.secondary} mt-2`}>Choose your data entry method: Specialized modules or Sector-specific metrics</p>
             </div>
-            <button 
+            <button
               onClick={onClose}
               className={`text-3xl ${theme.text.secondary} hover:text-red-600 transition-colors`}
             >
@@ -447,11 +445,10 @@ const UnifiedAdvancedEntry = ({ onClose }) => {
 
         {/* Toast Notification */}
         {toast && (
-          <div className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 animate-slide-in ${
-            toast.type === 'success' ? 'bg-green-500 text-white' :
+          <div className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 animate-slide-in ${toast.type === 'success' ? 'bg-green-500 text-white' :
             toast.type === 'error' ? 'bg-red-500 text-white' :
-            'bg-blue-500 text-white'
-          }`}>
+              'bg-blue-500 text-white'
+            }`}>
             <div className="flex items-center gap-2">
               <span>{toast.type === 'success' ? '✓' : toast.type === 'error' ? '✕' : 'ℹ'}</span>
               <span>{toast.message}</span>

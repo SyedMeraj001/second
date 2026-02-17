@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, Suspense, lazy } from "react";
 import * as XLSX from "xlsx";
 import { debounce } from "lodash";
 import ModuleAPI from "./services/moduleAPI";
@@ -11,7 +11,7 @@ import { useTheme } from "./contexts/ThemeContext";
 import { getThemeClasses } from "./utils/themeUtils";
 import ProfessionalHeader from "./components/ProfessionalHeader";
 import { Alert, Button, Toast } from "./components/ProfessionalUX";
-import UnifiedAdvancedEntry from "./modules/UnifiedAdvancedEntry";
+const UnifiedAdvancedEntry = lazy(() => import("./modules/UnifiedAdvancedEntry"));
 import SiteHierarchyManager from "./modules/SiteHierarchyManager";
 import { getUserRole } from "./utils/rbac";
 import AuditTrailViewer from "./components/AuditTrailViewer";
@@ -116,7 +116,7 @@ function DataEntry() {
   // Enhanced validation with industry standards
   const validateField = (category, field, value) => {
     if (value === '') return { isValid: true, errors: [], warnings: [] };
-    
+
     const result = DataValidation.validateESGData({ [category]: { [field]: value } });
     return result;
   };
@@ -136,7 +136,7 @@ function DataEntry() {
           [field]: value
         }
       };
-      
+
       // Trigger auto-save with audit trail
       const saveDataPayload = {
         ...newData.companyInfo,
@@ -147,12 +147,12 @@ function DataEntry() {
         timestamp: new Date().toISOString(),
         frameworkCompliance: DataValidation.validateDataCompleteness(newData)
       };
-      
+
       debouncedSave(saveDataPayload);
-      
+
       // Log to audit trail
       AuditTrail.trackDataUpdate({}, { category, field, value }, 'current_user');
-      
+
       return newData;
     });
   };
@@ -161,7 +161,7 @@ function DataEntry() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       // Validate required fields
       if (!formData.companyInfo.companyName.trim()) {
@@ -188,7 +188,7 @@ function DataEntry() {
       }
 
       setIsSaving(true);
-      
+
       // Prepare data for localStorage (simplified format)
       const submissionData = {
         id: Date.now().toString(),
@@ -206,12 +206,12 @@ function DataEntry() {
         timestamp: new Date().toISOString(),
         createdAt: new Date().toISOString()
       };
-      
+
       // Save to database via ModuleAPI
       const userEmail = localStorage.getItem('currentUser') || 'admin@esgenius.com';
       const companyId = userEmail;
       const userRole = getUserRole();
-      
+
       // Create approval workflow for data_entry role
       if (userRole === 'data_entry') {
         const AuditSystem = require('./utils/auditSystem').default;
@@ -220,7 +220,7 @@ function DataEntry() {
           'ESG Data Entry',
           userEmail
         );
-        
+
         // Create notification for supervisor
         const alerts = JSON.parse(localStorage.getItem('recentAlerts') || '[]');
         alerts.unshift({
@@ -234,7 +234,7 @@ function DataEntry() {
           workflowId: workflowId.id
         });
         localStorage.setItem('recentAlerts', JSON.stringify(alerts));
-        
+
         submissionData.status = 'Pending Approval';
         submissionData.workflowId = workflowId.id;
       }
@@ -250,7 +250,7 @@ function DataEntry() {
             complianceStatus: 'compliant'
           });
         }
-        
+
         // Save social data
         if (formData.social.totalEmployees) {
           await ModuleAPI.saveWorkforceData(companyId, {
@@ -263,7 +263,7 @@ function DataEntry() {
             isActive: true
           });
         }
-        
+
         // Save governance data
         if (formData.governance.boardSize) {
           await ModuleAPI.saveModuleData('EthicsCompliance', companyId, {
@@ -273,36 +273,36 @@ function DataEntry() {
             auditDate: new Date()
           });
         }
-        
+
         // Also save to localStorage for backward compatibility
         const existing = JSON.parse(localStorage.getItem('esgData') || '[]');
         existing.push(submissionData);
         localStorage.setItem('esgData', JSON.stringify(existing));
         localStorage.setItem('esg_last_submission', JSON.stringify(submissionData));
-        
+
         // Audit trail
         AuditSystem.recordAudit('CREATE', 'ESG Data Entry', submissionData.id, userEmail, { companyName: submissionData.companyName, sector: submissionData.sector });
-        
+
         // Dispatch custom event to notify other components
         window.dispatchEvent(new CustomEvent('esgDataUpdated', { detail: submissionData }));
       } catch (e) {
         console.error('Failed to save data:', e);
         throw new Error('Failed to save data');
       }
-      
+
       setCompletedSteps(prev => new Set([...prev, 5]));
-      
+
       if (userRole === 'data_entry') {
         showToast("Assessment submitted for approval!", 'success');
       } else {
         showToast("Assessment submitted successfully!", 'success');
       }
-      
+
       // Navigate to reports after a short delay
       setTimeout(() => {
         window.location.href = '/reports';
       }, 1000);
-      
+
     } catch (error) {
       showToast(`Error saving data: ${error.message}`, 'error');
       console.error('Submit failed:', error);
@@ -314,13 +314,13 @@ function DataEntry() {
   const handleFileUpload = (file) => {
     setUploadProgress(10);
     showToast(`Processing ${file.name}...`, 'info');
-    
+
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
         setUploadProgress(30);
         let jsonData;
-        
+
         if (file.name.endsWith('.json')) {
           jsonData = JSON.parse(event.target.result);
         } else {
@@ -328,34 +328,34 @@ function DataEntry() {
           const sheet = workbook.Sheets[workbook.SheetNames[0]];
           jsonData = XLSX.utils.sheet_to_json(sheet);
         }
-        
+
         setUploadProgress(50);
-        
+
         // Enhanced validation
         const requiredColumns = ['CompanyName', 'Category', 'Metric', 'Value'];
-        
+
         if (!jsonData[0]) throw new Error('File appears to be empty');
-        
+
         const fileColumns = Object.keys(jsonData[0]);
         const missingRequired = requiredColumns.filter(col => !fileColumns.includes(col));
-        
+
         if (missingRequired.length > 0) {
           throw new Error(`Missing required columns: ${missingRequired.join(', ')}`);
         }
 
         setUploadProgress(70);
-        
+
         const formatted = jsonData.map((row, index) => {
           // Enhanced validation
           if (!row.CompanyName?.trim()) {
             throw new Error(`Row ${index + 2}: Company Name is required`);
           }
-          
+
           const category = row.Category?.toLowerCase();
           if (!['environmental', 'social', 'governance'].includes(category)) {
             throw new Error(`Row ${index + 2}: Category must be Environmental, Social, or Governance`);
           }
-          
+
           const value = parseFloat(row.Value);
           if (isNaN(value)) {
             throw new Error(`Row ${index + 2}: Value '${row.Value}' is not a valid number`);
@@ -363,7 +363,7 @@ function DataEntry() {
 
           // Framework validation
           const validation = DataValidation.validateESGData({ [category]: { [row.Metric]: value } });
-          
+
           return {
             companyName: row.CompanyName.trim(),
             category: category,
@@ -386,11 +386,11 @@ function DataEntry() {
         });
 
         setUploadProgress(90);
-        
+
         // Audit trail for bulk import
         const currentUser = localStorage.getItem('currentUser') || 'admin@esgenius.com';
         AuditSystem.recordAudit('CREATE', 'Bulk ESG Import', `bulk_${Date.now()}`, currentUser, { count: formatted.length, source: file.name });
-        
+
         // Save each formatted entry to database via ModuleAPI
         const companyId = 'admin@esgenius.com';
         Promise.all(formatted.map(async entry => {
@@ -447,30 +447,30 @@ function DataEntry() {
             console.warn('Failed to save entry:', entry.metric, error);
           }
         }));
-        
+
         setUploadProgress(100);
-        
+
         const validEntries = formatted.filter(f => f.validation.isValid).length;
-        
+
         setTimeout(() => {
           setUploadProgress(0);
           const successMessage = `Import complete: ${validEntries} valid entries saved to backend`;
           showToast(successMessage, 'success');
         }, 1000);
-        
+
       } catch (error) {
         setUploadProgress(0);
         showToast(`Import failed: ${error.message}`, 'error');
       }
     };
-    
+
     reader.onprogress = (event) => {
       if (event.lengthComputable) {
         const fileProgress = Math.round((event.loaded / event.total) * 20);
         setUploadProgress(Math.min(20 + fileProgress, 90));
       }
     };
-    
+
     if (file.name.endsWith('.json')) {
       reader.readAsText(file);
     } else {
@@ -481,7 +481,7 @@ function DataEntry() {
   const onFileChange = (e) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
-    
+
     files.forEach(file => {
       if (!file.name.match(/\.(xlsx|csv|json)$/i)) {
         showToast(`Unsupported file type: ${file.name}`, 'error');
@@ -526,7 +526,7 @@ function DataEntry() {
     e.preventDefault();
     setDragOver(false);
     const files = Array.from(e.dataTransfer.files);
-    
+
     files.forEach(file => {
       if (file.name.match(/\.(xlsx|csv|json)$/i)) {
         handleFileUpload(file);
@@ -555,10 +555,10 @@ function DataEntry() {
     const totalSteps = steps.length;
     const currentProgress = Math.max(currentStep - 1, 0); // Current step progress
     const completedProgress = completedSteps.size; // Completed steps
-    
+
     // Use the higher of current step or completed steps for accurate progress
     const actualProgress = Math.max(currentProgress, completedProgress);
-    
+
     return Math.round((actualProgress / totalSteps) * 100);
   };
 
@@ -573,7 +573,7 @@ function DataEntry() {
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${theme.bg.gradient}`}>
-      <ProfessionalHeader 
+      <ProfessionalHeader
         onLogout={handleLogout}
         actions={[
           {
@@ -611,15 +611,15 @@ function DataEntry() {
             <div className="text-right">
               <div className={`text-sm font-medium ${theme.text.secondary}`}>Progress: {getStepProgress()}% Complete</div>
               <div className={`w-32 ${isDark ? 'bg-gray-700' : 'bg-gray-200'} rounded-full h-2 mt-2`}>
-                <div 
+                <div
                   className="bg-gradient-to-r from-blue-500 to-green-500 h-2 rounded-full transition-all duration-500 ease-out"
-                  style={{width: `${Math.max(getStepProgress(), 20)}%`}}
+                  style={{ width: `${Math.max(getStepProgress(), 20)}%` }}
                 ></div>
               </div>
               <div className={`text-xs ${theme.text.muted} mt-1`}>Step {currentStep} of {steps.length}</div>
             </div>
           </div>
-          
+
           {/* Step Navigation */}
           <div className="flex flex-wrap gap-2">
             {steps.map((step) => (
@@ -627,13 +627,12 @@ function DataEntry() {
                 key={step.id}
                 type="button"
                 onClick={() => goToStep(step.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  currentStep === step.id
-                    ? `${theme.bg.accent} ${theme.text.accent} ring-2 ring-blue-500`
-                    : completedSteps.has(step.id)
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${currentStep === step.id
+                  ? `${theme.bg.accent} ${theme.text.accent} ring-2 ring-blue-500`
+                  : completedSteps.has(step.id)
                     ? 'bg-green-100 text-green-800 hover:bg-green-200'
                     : `${theme.bg.subtle} ${theme.text.secondary} ${theme.hover.subtle}`
-                }`}
+                  }`}
               >
                 <span>{step.icon}</span>
                 <span className="hidden md:inline">{step.title}</span>
@@ -652,194 +651,193 @@ function DataEntry() {
                 <p className={`${theme.text.secondary}`}>Let's start with basic company details and framework selection</p>
               </div>
               <div className={`p-6 rounded-lg ${theme.bg.subtle}`}>
-            <h3 className={`text-lg font-bold ${theme.text.primary} mb-4`}>Company Information & Framework Selection</h3>
-            <Alert 
-              type="info"
-              title="Flexible Company Management"
-              message="You can edit company information at any time and manage data for multiple companies."
-              className="mb-4"
-            />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="md:col-span-2">
-                <label className={`block text-sm font-medium ${theme.text.secondary} mb-1`}>Company Name *</label>
-                <div className="flex gap-2">
-                  {!isEditingCompany && formData.companyInfo.companyName ? (
-                    <>
-                      <div className={`flex-1 border rounded-md px-4 py-2 ${theme.bg.input} ${theme.border.input} ${theme.text.primary} bg-gray-50 flex items-center justify-between`}>
-                        <span className="font-medium">{formData.companyInfo.companyName}</span>
-                        <span className="text-xs text-gray-500 ml-2">(Auto-filled)</span>
+                <h3 className={`text-lg font-bold ${theme.text.primary} mb-4`}>Company Information & Framework Selection</h3>
+                <Alert
+                  type="info"
+                  title="Flexible Company Management"
+                  message="You can edit company information at any time and manage data for multiple companies."
+                  className="mb-4"
+                />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <label className={`block text-sm font-medium ${theme.text.secondary} mb-1`}>Company Name *</label>
+                    <div className="flex gap-2">
+                      {!isEditingCompany && formData.companyInfo.companyName ? (
+                        <>
+                          <div className={`flex-1 border rounded-md px-4 py-2 ${theme.bg.input} ${theme.border.input} ${theme.text.primary} bg-gray-50 flex items-center justify-between`}>
+                            <span className="font-medium">{formData.companyInfo.companyName}</span>
+                            <span className="text-xs text-gray-500 ml-2">(Auto-filled)</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setIsEditingCompany(true)}
+                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm flex items-center gap-1"
+                            title="Edit company name"
+                          >
+                            ✏️ Edit
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <input
+                            type="text"
+                            value={formData.companyInfo.companyName}
+                            onChange={(e) => {
+                              handleChange('companyInfo', 'companyName', e.target.value);
+                            }}
+                            className={`flex-1 border rounded-md px-4 py-2 ${theme.bg.input} ${theme.border.input} ${theme.text.primary}`}
+                            placeholder="Enter company name (e.g., Acme Corporation)"
+                            required
+                            autoFocus
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (formData.companyInfo.companyName.trim()) {
+                                localStorage.setItem('esg_company_name', formData.companyInfo.companyName);
+                                setIsEditingCompany(false);
+                                showToast('Company name saved', 'success');
+                              }
+                            }}
+                            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm"
+                            disabled={!formData.companyInfo.companyName.trim()}
+                          >
+                            ✓ Save
+                          </button>
+                        </>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Company name is auto-filled for all entries. Click Edit to change.</p>
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className={`block text-sm font-medium ${theme.text.secondary} mb-1`}>Site/Business Unit</label>
+                    <div className="flex gap-2">
+                      <div className={`flex-1 border rounded-md px-4 py-2 ${theme.bg.input} ${theme.border.input}`}>
+                        {selectedSite ? (
+                          <div>
+                            <span className="font-medium">{selectedSite.name}</span>
+                            <span className={`text-xs ${theme.text.muted} ml-2`}>({selectedSite.type})</span>
+                          </div>
+                        ) : (
+                          <span className={theme.text.muted}>No site selected (Company-level)</span>
+                        )}
                       </div>
                       <button
                         type="button"
-                        onClick={() => setIsEditingCompany(true)}
-                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm flex items-center gap-1"
-                        title="Edit company name"
+                        onClick={() => setShowSiteManager(true)}
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm"
                       >
-                        ✏️ Edit
+                        {selectedSite ? '✏️ Change' : '➕ Select Site'}
                       </button>
-                    </>
-                  ) : (
-                    <>
-                      <input
-                        type="text"
-                        value={formData.companyInfo.companyName}
-                        onChange={(e) => {
-                          handleChange('companyInfo', 'companyName', e.target.value);
-                        }}
-                        className={`flex-1 border rounded-md px-4 py-2 ${theme.bg.input} ${theme.border.input} ${theme.text.primary}`}
-                        placeholder="Enter company name (e.g., Acme Corporation)"
-                        required
-                        autoFocus
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (formData.companyInfo.companyName.trim()) {
-                            localStorage.setItem('esg_company_name', formData.companyInfo.companyName);
-                            setIsEditingCompany(false);
-                            showToast('Company name saved', 'success');
-                          }
-                        }}
-                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm"
-                        disabled={!formData.companyInfo.companyName.trim()}
-                      >
-                        ✓ Save
-                      </button>
-                    </>
-                  )}
-                </div>
-                <p className="text-xs text-gray-500 mt-1">Company name is auto-filled for all entries. Click Edit to change.</p>
-              </div>
-              <div className="md:col-span-2">
-                <label className={`block text-sm font-medium ${theme.text.secondary} mb-1`}>Site/Business Unit</label>
-                <div className="flex gap-2">
-                  <div className={`flex-1 border rounded-md px-4 py-2 ${theme.bg.input} ${theme.border.input}`}>
-                    {selectedSite ? (
-                      <div>
-                        <span className="font-medium">{selectedSite.name}</span>
-                        <span className={`text-xs ${theme.text.muted} ml-2`}>({selectedSite.type})</span>
+                      {selectedSite && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedSite(null);
+                            setFormData(prev => ({
+                              ...prev,
+                              companyInfo: { ...prev.companyInfo, siteId: null, siteName: '' }
+                            }));
+                            showToast('Switched to company-level reporting', 'info');
+                          }}
+                          className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-md text-sm"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Select a site/business unit for site-level reporting, or leave empty for company-level.</p>
+                  </div>
+                  <div>
+                    <label className={`block text-sm font-medium ${theme.text.secondary} mb-1`}>Reporting Year</label>
+                    <input
+                      type="number"
+                      value={formData.companyInfo.reportingYear}
+                      onChange={(e) => handleChange('companyInfo', 'reportingYear', e.target.value)}
+                      className={`w-full border rounded-md px-4 py-2 ${theme.bg.input} ${theme.border.input} ${theme.text.primary}`}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className={`block text-sm font-medium ${theme.text.secondary} mb-1`}>Sector</label>
+                    <select
+                      value={formData.companyInfo.sector}
+                      onChange={(e) => handleChange('companyInfo', 'sector', e.target.value)}
+                      className={`w-full border rounded-md px-4 py-2 ${theme.bg.input} ${theme.border.input} ${theme.text.primary}`}
+                      required
+                    >
+                      <option value="">Select sector</option>
+                      <option value="mining">Mining & Extractives</option>
+                      <option value="healthcare">Healthcare</option>
+                      <option value="manufacturing">Manufacturing</option>
+                      <option value="technology">Technology & IT Services</option>
+                      <option value="financial">Financial Services & Banking</option>
+                      <option value="retail">Retail & Consumer Goods</option>
+                      <option value="telecommunications">Telecommunications</option>
+                      <option value="real_estate">Real Estate & Property</option>
+                      <option value="hospitality">Hospitality & Tourism</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className={`block text-sm font-medium ${theme.text.secondary} mb-1`}>Region</label>
+                    <select
+                      value={formData.companyInfo.region}
+                      onChange={(e) => handleChange('companyInfo', 'region', e.target.value)}
+                      className={`w-full border rounded-md px-4 py-2 ${theme.bg.input} ${theme.border.input} ${theme.text.primary}`}
+                      required
+                    >
+                      <option value="">Select region</option>
+                      <option value="africa">Africa</option>
+                      <option value="zimbabwe">Zimbabwe</option>
+                      <option value="southern_africa">Southern Africa</option>
+                      <option value="north_america">North America</option>
+                      <option value="europe">Europe</option>
+                      <option value="asia_pacific">Asia Pacific</option>
+                      <option value="latin_america">Latin America</option>
+                      <option value="middle_east">Middle East</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className={`block text-sm font-medium ${theme.text.secondary} mb-1`}>Primary Reporting Framework *</label>
+                    <select
+                      value={formData.companyInfo.reportingFramework}
+                      onChange={(e) => {
+                        handleChange('companyInfo', 'reportingFramework', e.target.value);
+                        // Update compliance when framework changes
+                        const compliance = DataValidation.validateDataCompleteness(formData);
+                        setFrameworkCompliance(compliance);
+                      }}
+                      className={`w-full border rounded-md px-4 py-2 ${theme.bg.input} ${theme.border.input} ${theme.text.primary}`}
+                      required
+                    >
+                      {Object.entries(ESG_FRAMEWORKS).map(([key, framework]) => (
+                        <option key={key} value={key}>{framework.name} - {framework.description}</option>
+                      ))}
+                    </select>
+                    {frameworkCompliance.score !== undefined && (
+                      <div className="mt-2 text-sm">
+                        <span className={`px-2 py-1 rounded ${frameworkCompliance.score >= 80 ? 'bg-green-100 text-green-800' :
+                          frameworkCompliance.score >= 60 ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-red-100 text-red-800'
+                          }`}>
+                          Compliance: {frameworkCompliance.score}%
+                        </span>
                       </div>
-                    ) : (
-                      <span className={theme.text.muted}>No site selected (Company-level)</span>
                     )}
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setShowSiteManager(true)}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm"
-                  >
-                    {selectedSite ? '✏️ Change' : '➕ Select Site'}
-                  </button>
-                  {selectedSite && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedSite(null);
-                        setFormData(prev => ({
-                          ...prev,
-                          companyInfo: { ...prev.companyInfo, siteId: null, siteName: '' }
-                        }));
-                        showToast('Switched to company-level reporting', 'info');
-                      }}
-                      className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-md text-sm"
+                  <div>
+                    <label className={`block text-sm font-medium ${theme.text.secondary} mb-1`}>Assurance Level</label>
+                    <select
+                      value={formData.companyInfo.assuranceLevel}
+                      onChange={(e) => handleChange('companyInfo', 'assuranceLevel', e.target.value)}
+                      className={`w-full border rounded-md px-4 py-2 ${theme.bg.input} ${theme.border.input} ${theme.text.primary}`}
                     >
-                      ✕
-                    </button>
-                  )}
-                </div>
-                <p className="text-xs text-gray-500 mt-1">Select a site/business unit for site-level reporting, or leave empty for company-level.</p>
-              </div>
-              <div>
-                <label className={`block text-sm font-medium ${theme.text.secondary} mb-1`}>Reporting Year</label>
-                <input
-                  type="number"
-                  value={formData.companyInfo.reportingYear}
-                  onChange={(e) => handleChange('companyInfo', 'reportingYear', e.target.value)}
-                  className={`w-full border rounded-md px-4 py-2 ${theme.bg.input} ${theme.border.input} ${theme.text.primary}`}
-                  required
-                />
-              </div>
-              <div>
-                <label className={`block text-sm font-medium ${theme.text.secondary} mb-1`}>Sector</label>
-                <select
-                  value={formData.companyInfo.sector}
-                  onChange={(e) => handleChange('companyInfo', 'sector', e.target.value)}
-                  className={`w-full border rounded-md px-4 py-2 ${theme.bg.input} ${theme.border.input} ${theme.text.primary}`}
-                  required
-                >
-                  <option value="">Select sector</option>
-                  <option value="mining">Mining & Extractives</option>
-                  <option value="healthcare">Healthcare</option>
-                  <option value="manufacturing">Manufacturing</option>
-                  <option value="technology">Technology & IT Services</option>
-                  <option value="financial">Financial Services & Banking</option>
-                  <option value="retail">Retail & Consumer Goods</option>
-                  <option value="telecommunications">Telecommunications</option>
-                  <option value="real_estate">Real Estate & Property</option>
-                  <option value="hospitality">Hospitality & Tourism</option>
-                </select>
-              </div>
-              <div>
-                <label className={`block text-sm font-medium ${theme.text.secondary} mb-1`}>Region</label>
-                <select
-                  value={formData.companyInfo.region}
-                  onChange={(e) => handleChange('companyInfo', 'region', e.target.value)}
-                  className={`w-full border rounded-md px-4 py-2 ${theme.bg.input} ${theme.border.input} ${theme.text.primary}`}
-                  required
-                >
-                  <option value="">Select region</option>
-                  <option value="africa">Africa</option>
-                  <option value="zimbabwe">Zimbabwe</option>
-                  <option value="southern_africa">Southern Africa</option>
-                  <option value="north_america">North America</option>
-                  <option value="europe">Europe</option>
-                  <option value="asia_pacific">Asia Pacific</option>
-                  <option value="latin_america">Latin America</option>
-                  <option value="middle_east">Middle East</option>
-                </select>
-              </div>
-              <div>
-                <label className={`block text-sm font-medium ${theme.text.secondary} mb-1`}>Primary Reporting Framework *</label>
-                <select
-                  value={formData.companyInfo.reportingFramework}
-                  onChange={(e) => {
-                    handleChange('companyInfo', 'reportingFramework', e.target.value);
-                    // Update compliance when framework changes
-                    const compliance = DataValidation.validateDataCompleteness(formData);
-                    setFrameworkCompliance(compliance);
-                  }}
-                  className={`w-full border rounded-md px-4 py-2 ${theme.bg.input} ${theme.border.input} ${theme.text.primary}`}
-                  required
-                >
-                  {Object.entries(ESG_FRAMEWORKS).map(([key, framework]) => (
-                    <option key={key} value={key}>{framework.name} - {framework.description}</option>
-                  ))}
-                </select>
-                {frameworkCompliance.score !== undefined && (
-                  <div className="mt-2 text-sm">
-                    <span className={`px-2 py-1 rounded ${
-                      frameworkCompliance.score >= 80 ? 'bg-green-100 text-green-800' :
-                      frameworkCompliance.score >= 60 ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      Compliance: {frameworkCompliance.score}%
-                    </span>
+                      <option value="None">No External Assurance</option>
+                      <option value="Limited">Limited Assurance</option>
+                      <option value="Reasonable">Reasonable Assurance</option>
+                    </select>
                   </div>
-                )}
-              </div>
-              <div>
-                <label className={`block text-sm font-medium ${theme.text.secondary} mb-1`}>Assurance Level</label>
-                <select
-                  value={formData.companyInfo.assuranceLevel}
-                  onChange={(e) => handleChange('companyInfo', 'assuranceLevel', e.target.value)}
-                  className={`w-full border rounded-md px-4 py-2 ${theme.bg.input} ${theme.border.input} ${theme.text.primary}`}
-                >
-                  <option value="None">No External Assurance</option>
-                  <option value="Limited">Limited Assurance</option>
-                  <option value="Reasonable">Reasonable Assurance</option>
-                </select>
-              </div>
-            </div>
+                </div>
               </div>
             </div>
           )}
@@ -1195,7 +1193,7 @@ function DataEntry() {
                 <h3 className={`text-2xl font-bold ${theme.text.primary} mb-2`}>📋 Review & Submit</h3>
                 <p className={`${theme.text.secondary}`}>Review your ESG data before submission</p>
               </div>
-              
+
               {/* Company Information Summary */}
               <div className={`p-6 rounded-lg ${theme.bg.subtle} mb-6`}>
                 <div className="flex items-center justify-between mb-4">
@@ -1267,7 +1265,7 @@ function DataEntry() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className={`p-4 rounded border ${theme.bg.card} ${theme.border.primary}`}>
                     <h4 className={`font-medium ${theme.text.primary} mb-3 flex items-center gap-2`}>
                       👥 Social Metrics
@@ -1307,7 +1305,7 @@ function DataEntry() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className={`p-4 rounded border ${theme.bg.card} ${theme.border.primary}`}>
                     <h4 className={`font-medium ${theme.text.primary} mb-3 flex items-center gap-2`}>
                       ⚖️ Governance Metrics
@@ -1364,31 +1362,28 @@ function DataEntry() {
                 <div className="grid grid-cols-3 gap-4 text-sm">
                   <div>
                     <span className={`${theme.text.secondary}`}>Environmental:</span>
-                    <span className={`ml-2 px-2 py-1 rounded text-xs ${
-                      Object.values(formData.environmental).filter(v => v !== '').length >= 3 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}>
+                    <span className={`ml-2 px-2 py-1 rounded text-xs ${Object.values(formData.environmental).filter(v => v !== '').length >= 3
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-yellow-100 text-yellow-800'
+                      }`}>
                       {Object.values(formData.environmental).filter(v => v !== '').length}/7 fields
                     </span>
                   </div>
                   <div>
                     <span className={`${theme.text.secondary}`}>Social:</span>
-                    <span className={`ml-2 px-2 py-1 rounded text-xs ${
-                      Object.values(formData.social).filter(v => v !== '').length >= 4 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}>
+                    <span className={`ml-2 px-2 py-1 rounded text-xs ${Object.values(formData.social).filter(v => v !== '').length >= 4
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-yellow-100 text-yellow-800'
+                      }`}>
                       {Object.values(formData.social).filter(v => v !== '').length}/8 fields
                     </span>
                   </div>
                   <div>
                     <span className={`${theme.text.secondary}`}>Governance:</span>
-                    <span className={`ml-2 px-2 py-1 rounded text-xs ${
-                      Object.values(formData.governance).filter(v => v !== '').length >= 5 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}>
+                    <span className={`ml-2 px-2 py-1 rounded text-xs ${Object.values(formData.governance).filter(v => v !== '').length >= 5
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-yellow-100 text-yellow-800'
+                      }`}>
                       {Object.values(formData.governance).filter(v => v !== '').length}/10 fields
                     </span>
                   </div>
@@ -1420,7 +1415,7 @@ function DataEntry() {
                 </Button>
               )}
             </div>
-            
+
             <div className="flex gap-3">
               {currentStep === 5 && (
                 <>
@@ -1430,10 +1425,10 @@ function DataEntry() {
                       const validation = performFullValidation(formData);
                       setValidationResults(validation);
                       setShowValidationPanel(true);
-                      
+
                       // Push validation errors to notifications
                       const alerts = JSON.parse(localStorage.getItem('recentAlerts') || '[]');
-                      
+
                       if (validation.summary.totalCritical > 0) {
                         alerts.unshift({
                           id: Date.now(),
@@ -1445,7 +1440,7 @@ function DataEntry() {
                           read: false
                         });
                       }
-                      
+
                       if (validation.summary.totalErrors > 0) {
                         alerts.unshift({
                           id: Date.now() + 1,
@@ -1457,7 +1452,7 @@ function DataEntry() {
                           read: false
                         });
                       }
-                      
+
                       if (validation.summary.totalWarnings > 0) {
                         alerts.unshift({
                           id: Date.now() + 2,
@@ -1469,7 +1464,7 @@ function DataEntry() {
                           read: false
                         });
                       }
-                      
+
                       if (validation.summary.totalCritical === 0 && validation.summary.totalErrors === 0 && validation.summary.totalWarnings === 0) {
                         alerts.unshift({
                           id: Date.now(),
@@ -1481,7 +1476,7 @@ function DataEntry() {
                           read: false
                         });
                       }
-                      
+
                       localStorage.setItem('recentAlerts', JSON.stringify(alerts));
                     }}
                     className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"
@@ -1500,7 +1495,7 @@ function DataEntry() {
                   </Button>
                 </>
               )}
-              
+
               <div className="flex gap-3">
                 {currentStep === 1 && (
                   <button type="button" onClick={() => {
@@ -1535,14 +1530,13 @@ function DataEntry() {
                   </button>
                 )}
                 {currentStep === 5 && (
-                  <button 
-                    type="submit" 
+                  <button
+                    type="submit"
                     disabled={isSaving || !formData.companyInfo.companyName.trim()}
-                    className={`px-6 py-2 rounded-md font-medium transition-colors duration-200 ${
-                      isSaving || !formData.companyInfo.companyName.trim()
-                        ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                        : 'bg-green-600 text-white hover:bg-green-700 active:bg-green-800'
-                    }`}
+                    className={`px-6 py-2 rounded-md font-medium transition-colors duration-200 ${isSaving || !formData.companyInfo.companyName.trim()
+                      ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                      : 'bg-green-600 text-white hover:bg-green-700 active:bg-green-800'
+                      }`}
                   >
                     {isSaving ? (
                       <span className="flex items-center gap-2">
@@ -1624,7 +1618,7 @@ function DataEntry() {
                     Supports: .xlsx, .csv, .json
                   </div>
                 </div>
-                
+
                 {/* Enhanced Progress Bar */}
                 {uploadProgress > 0 && (
                   <div className="absolute bottom-0 left-0 w-full">
@@ -1633,7 +1627,7 @@ function DataEntry() {
                       <span className="text-xs">{uploadProgress}%</span>
                     </div>
                     <div className="h-1 bg-gray-200">
-                      <div 
+                      <div
                         className="h-1 bg-gradient-to-r from-blue-500 to-green-500 transition-all duration-300"
                         style={{ width: `${uploadProgress}%` }}
                       />
@@ -1732,7 +1726,9 @@ function DataEntry() {
 
         {/* Unified Advanced Data Entry Modal */}
         {showAdvancedEntry && (
-          <UnifiedAdvancedEntry onClose={() => setShowAdvancedEntry(false)} />
+          <Suspense fallback={<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"><div className="text-white text-xl">Loading Advanced Entry...</div></div>}>
+            <UnifiedAdvancedEntry onClose={() => setShowAdvancedEntry(false)} />
+          </Suspense>
         )}
 
         {/* Audit Trail Viewer */}
@@ -1773,7 +1769,7 @@ function DataEntry() {
                 <div className={`p-4 rounded-lg ${theme.bg.subtle} mb-6`}>
                   <h3 className={`font-semibold ${theme.text.primary} mb-2`}>GRI Completeness: {validationResults.summary.griCompletenessScore}%</h3>
                   <div className="w-full bg-gray-200 rounded-full h-3">
-                    <div className="bg-green-500 h-3 rounded-full" style={{width: `${validationResults.summary.griCompletenessScore}%`}}></div>
+                    <div className="bg-green-500 h-3 rounded-full" style={{ width: `${validationResults.summary.griCompletenessScore}%` }}></div>
                   </div>
                 </div>
 

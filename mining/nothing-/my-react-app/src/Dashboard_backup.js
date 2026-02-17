@@ -1,32 +1,23 @@
-import React, { useEffect, useState, Suspense, lazy } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "./contexts/ThemeContext";
 import { MetricCard, StatusCard } from "./components/ProfessionalCard";
+import ProfessionalHeader from "./components/ProfessionalHeader";
 
-// Lazy load components to prevent circular dependencies
-const ProfessionalHeader = lazy(() => import("./components/ProfessionalHeader"));
-const PredictiveForecastingDashboard = lazy(() => import("./components/PredictiveForecastingDashboard"));
-const AIInsightsPanel = lazy(() => import("./components/AIInsightsPanel"));
-const EnhancedScenarioModelling = lazy(() => import("./components/EnhancedScenarioModelling"));
-const EUTaxonomyNavigator = lazy(() => import("./components/EUTaxonomyNavigator"));
-const AlertCenter = lazy(() => import("./components/AlertCenter"));
-const EnterpriseRiskHeatmap = lazy(() => import("./components/EnterpriseRiskHeatmap"));
-const CustomTaxonomyBuilder = lazy(() => import("./components/CustomTaxonomyBuilder"));
-const AdvancedBenchmarking = lazy(() => import("./components/AdvancedBenchmarking"));
-const ComplianceCalendar = lazy(() => import("./components/ComplianceCalendar"));
-const AuditTrailViewer = lazy(() => import("./components/AuditTrailViewer"));
-const WorkflowDashboard = lazy(() => import("./components/WorkflowDashboard"));
-const EvidenceUploader = lazy(() => import("./components/EvidenceUploader"));
-const ComplianceReports = lazy(() => import("./components/ComplianceReports"));
-const SupportTicketing = lazy(() => import("./components/SupportTicketing"));
-const UnifiedAdvancedEntry = lazy(() => import("./modules/UnifiedAdvancedEntry"));
-
-// Simple loading fallback
-const DashboardLoader = () => (
-  <div className="flex items-center justify-center p-8">
-    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-  </div>
-);
+import PredictiveForecastingDashboard from "./components/PredictiveForecastingDashboard";
+import AIInsightsPanel from "./components/AIInsightsPanel";
+import EnhancedScenarioModelling from "./components/EnhancedScenarioModelling";
+import EUTaxonomyNavigator from "./components/EUTaxonomyNavigator";
+import AlertCenter from "./components/AlertCenter";
+import EnterpriseRiskHeatmap from "./components/EnterpriseRiskHeatmap";
+import CustomTaxonomyBuilder from "./components/CustomTaxonomyBuilder";
+import AdvancedBenchmarking from "./components/AdvancedBenchmarking";
+import ComplianceCalendar from "./components/ComplianceCalendar";
+import AuditTrailViewer from "./components/AuditTrailViewer";
+import WorkflowDashboard from "./components/WorkflowDashboard";
+import EvidenceUploader from "./components/EvidenceUploader";
+import ComplianceReports from "./components/ComplianceReports";
+import SupportTicketing from "./components/SupportTicketing";
 const ModuleAPI = {
   calculateKPIs: () => Promise.resolve({
     success: true,
@@ -84,7 +75,7 @@ function normalizeData(data) {
           year = item.reportingYear || new Date().getFullYear();
         }
       }
-
+      
       if (item.environmental || item.social || item.governance) {
         const results = [];
         ['environmental', 'social', 'governance'].forEach(cat => {
@@ -118,13 +109,13 @@ function normalizeData(data) {
       }
     })
     .flat()
-    .filter(item => item.year && item.category && item.value !== null && ['environmental', 'social', 'governance'].includes(item.category));
+    .filter(item => item.year && item.category && item.value !== null && ['environmental','social','governance'].includes(item.category));
 }
 
 function aggregateOverall(data) {
   const agg = { environmental: { sum: 0, count: 0 }, social: { sum: 0, count: 0 }, governance: { sum: 0, count: 0 } };
   data.forEach(item => {
-    if (['environmental', 'social', 'governance'].includes(item.category)) {
+    if (['environmental','social','governance'].includes(item.category)) {
       agg[item.category].sum += item.value;
       agg[item.category].count += 1;
     }
@@ -257,14 +248,14 @@ function Dashboard() {
       const currentUser = localStorage.getItem('currentUser');
       const companyId = currentUser || '1';
       setLoading(true);
-
+      
       try {
         // Fetch KPIs, Reports, and Analytics data in parallel
         const [kpiResponse, dashboardSummary] = await Promise.all([
           ModuleAPI.calculateKPIs(companyId).catch(() => ({ success: false })),
           ReportsAPI.fetchDashboardSummary().catch(() => ({ success: false }))
         ]);
-
+        
         // Update KPIs with capping at 100
         if (kpiResponse.success) {
           setKpis({
@@ -276,20 +267,20 @@ function Dashboard() {
             totalEntries: kpiResponse.data.totalEntries || 0
           });
         }
-
+        
         // Update Reports and Analytics Data
         if (dashboardSummary.success) {
           setReportsData(dashboardSummary.data.comprehensive);
           setAnalyticsData(dashboardSummary.data.performance);
         }
-
+        
       } catch (error) {
         console.warn('Data fetch failed:', error);
       } finally {
         setLoading(false);
       }
     };
-
+    
     const loadAlerts = () => {
       const storedAlerts = JSON.parse(localStorage.getItem('recentAlerts') || '[]');
       const now = new Date();
@@ -307,23 +298,23 @@ function Dashboard() {
         }));
       setAlerts(recentAlerts);
     };
-
+    
     updateData();
     loadAlerts();
-
+    
     // Listen for storage changes to update in real-time
     const handleStorageChange = () => {
       updateData();
       loadAlerts();
     };
     window.addEventListener('storage', handleStorageChange);
-
+    
     // Check for updates periodically (reduced frequency)
     const interval = setInterval(() => {
       updateData();
       loadAlerts();
     }, 30000); // Changed from 5000ms to 30000ms (30 seconds)
-
+    
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       clearInterval(interval);
@@ -338,52 +329,50 @@ function Dashboard() {
   const currentUser = localStorage.getItem('currentUser');
 
   return (
-    <div className={`min-h-screen transition-all duration-500 ${isDark
-      ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900'
-      : 'bg-gradient-to-br from-blue-50 via-indigo-50/40 to-purple-50/30'
-      }`} style={{
-        backgroundImage: isDark ? '' : 'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.12) 0%, transparent 50%), radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.1) 0%, transparent 50%)'
-      }}>
-      <Suspense fallback={<DashboardLoader />}>
-        <ProfessionalHeader
-          onLogout={handleLogout}
-          currentUser={currentUser}
-        />
-      </Suspense>
+    <div className={`min-h-screen transition-all duration-500 ${
+      isDark 
+        ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' 
+        : 'bg-gradient-to-br from-blue-50 via-indigo-50/40 to-purple-50/30'
+    }`} style={{
+      backgroundImage: isDark ? '' : 'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.12) 0%, transparent 50%), radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.1) 0%, transparent 50%)'
+    }}>
+      <ProfessionalHeader 
+        onLogout={handleLogout}
+        currentUser={currentUser}
+      />
 
-
-      {/* Main Content */}
+      {/* Main Content */
       <main className="max-w-7xl mx-auto p-6">
         {/* Enhanced KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <MetricCard
-            icon="⭐"
+          <MetricCard 
+            icon="⭐" 
             value={Math.round(kpis.overallScore) || 0}
-            label="Overall ESG Score"
+            label="Overall ESG Score" 
             trend={kpis.overallScore > 0 ? "↑ Active" : "→ No Data"}
             trendColor={kpis.overallScore > 0 ? "success" : "neutral"}
             progress={kpis.overallScore}
           />
-          <MetricCard
-            icon="✓"
+          <MetricCard 
+            icon="✓" 
             value={`${Math.round(kpis.complianceRate) || 0}%`}
-            label="Compliance Rate"
+            label="Compliance Rate" 
             trend={kpis.totalEntries > 0 ? "↑ Updated" : "→ No Data"}
             trendColor={kpis.totalEntries > 0 ? "info" : "neutral"}
             progress={kpis.complianceRate}
           />
-          <MetricCard
-            icon="🌍"
+          <MetricCard 
+            icon="🌍" 
             value={`${Math.round(kpis.environmental) || 0}%`}
             label="Environmental Score"
             trend={kpis.environmental > 0 ? "↑ Active" : "→ No Data"}
             trendColor={kpis.environmental > 0 ? "success" : "neutral"}
             progress={kpis.environmental}
           />
-          <MetricCard
-            icon="📈"
+          <MetricCard 
+            icon="📈" 
             value={kpis.totalEntries || 0}
-            label="Total Data Entries"
+            label="Total Data Entries" 
             trend={kpis.totalEntries > 0 ? "↑ Growing" : "→ Start Adding"}
             trendColor={kpis.totalEntries > 0 ? "success" : "neutral"}
             progress={Math.min((kpis.totalEntries / 50) * 100, 100)}
@@ -395,21 +384,22 @@ function Dashboard() {
         {/* Enhanced Bottom Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Enhanced Quick Actions */}
-          <div className={`rounded-2xl p-6 border transition-all duration-300 hover:scale-[1.02] ${isDark
-            ? 'bg-gray-800/90 border-gray-700 shadow-xl hover:shadow-2xl backdrop-blur-sm'
-            : 'bg-white/70 backdrop-blur-2xl border-white/30 shadow-lg shadow-slate-200/30 hover:shadow-xl hover:shadow-slate-300/40'
-            }`} style={{
-              boxShadow: isDark ? '' : '0 25px 50px -12px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.3)'
-            }}>
+          <div className={`rounded-2xl p-6 border transition-all duration-300 hover:scale-[1.02] ${
+            isDark 
+              ? 'bg-gray-800/90 border-gray-700 shadow-xl hover:shadow-2xl backdrop-blur-sm' 
+              : 'bg-white/70 backdrop-blur-2xl border-white/30 shadow-lg shadow-slate-200/30 hover:shadow-xl hover:shadow-slate-300/40'
+          }`} style={{
+            boxShadow: isDark ? '' : '0 25px 50px -12px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.3)'
+          }}>
             <div className="flex items-center gap-2 mb-6">
               <span className="text-2xl">⚡</span>
               <h2 className={`text-lg font-semibold transition-colors duration-300 ${theme.text.primary}`}>Quick Actions</h2>
             </div>
-
+            
             <div className="space-y-3">
               {/* Primary Actions */}
               <div className={`border rounded-lg p-3 ${theme.border.primary} ${showPrimaryActions ? 'border-blue-500 bg-blue-50/20' : ''}`}>
-                <div
+                <div 
                   className={`flex items-center justify-between cursor-pointer p-2 rounded transition-all duration-200 ${theme.hover.card}`}
                   onClick={() => setShowPrimaryActions(!showPrimaryActions)}
                 >
@@ -422,26 +412,30 @@ function Dashboard() {
                   </div>
                   <span className={`text-lg ${theme.text.secondary} transform transition-transform duration-200 ${showPrimaryActions ? 'rotate-90' : ''}`}>▶</span>
                 </div>
-
+                
                 {showPrimaryActions && (
                   <div className="mt-3 space-y-2 animate-fade-in">
-                    <Link to="/data-entry" className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
-                      }`}>
+                    <Link to="/data-entry" className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                      isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
+                    }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">⚡</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Add New Data</span>
                     </Link>
-                    <Link to="/analytics" className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
-                      }`}>
+                    <Link to="/analytics" className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                      isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
+                    }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">📊</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>View Analytics</span>
                     </Link>
-                    <div onClick={() => setShowEnhancedEntry(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
-                      }`}>
+                    <div onClick={() => setShowEnhancedEntry(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                      isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
+                    }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">🚀</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Advanced Data Entry</span>
                     </div>
-                    <Link to="/reports" className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
-                      }`}>
+                    <Link to="/reports" className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                      isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
+                    }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">📋</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Generate Report</span>
                     </Link>
@@ -451,7 +445,7 @@ function Dashboard() {
 
               {/* Management Actions */}
               <div className={`border rounded-lg p-3 ${theme.border.primary} ${showManagementActions ? 'border-orange-500 bg-orange-50/20' : ''}`}>
-                <div
+                <div 
                   className={`flex items-center justify-between cursor-pointer p-2 rounded transition-all duration-200 ${theme.hover.card}`}
                   onClick={() => setShowManagementActions(!showManagementActions)}
                 >
@@ -464,7 +458,7 @@ function Dashboard() {
                   </div>
                   <span className={`text-lg ${theme.text.secondary} transform transition-transform duration-200 ${showManagementActions ? 'rotate-90' : ''}`}>▶</span>
                 </div>
-
+                
                 {showManagementActions && (
                   <div className="mt-3 space-y-2 animate-fade-in">
                     {[
@@ -473,10 +467,11 @@ function Dashboard() {
                       { icon: '📋', label: 'Stakeholder Surveys', link: '/stakeholder-surveys' },
                       { icon: '⚖️', label: 'Regulatory', link: '/regulatory' }
                     ].map((action, index) => (
-                      <Link key={index} to={action.link} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${isDark
-                        ? 'hover:bg-gray-700/50'
-                        : 'hover:bg-gray-50/80 hover:shadow-md'
-                        }`}>
+                      <Link key={index} to={action.link} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                        isDark 
+                          ? 'hover:bg-gray-700/50' 
+                          : 'hover:bg-gray-50/80 hover:shadow-md'
+                      }`}>
                         <span className="text-lg group-hover:scale-110 transition-transform duration-200">{action.icon}</span>
                         <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>{action.label}</span>
                       </Link>
@@ -487,7 +482,7 @@ function Dashboard() {
 
               {/* Advanced Actions */}
               <div className={`border rounded-lg p-3 ${theme.border.primary} ${showAdvancedActions ? 'border-purple-500 bg-purple-50/20' : ''}`}>
-                <div
+                <div 
                   className={`flex items-center justify-between cursor-pointer p-2 rounded transition-all duration-200 ${theme.hover.card}`}
                   onClick={() => setShowAdvancedActions(!showAdvancedActions)}
                 >
@@ -500,41 +495,47 @@ function Dashboard() {
                   </div>
                   <span className={`text-lg ${theme.text.secondary} transform transition-transform duration-200 ${showAdvancedActions ? 'rotate-90' : ''}`}>▶</span>
                 </div>
-
+                
                 {showAdvancedActions && (
                   <div className="mt-3 space-y-2 animate-fade-in">
-                    <div onClick={() => setShowForecasting(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
-                      }`}>
+                    <div onClick={() => setShowForecasting(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                      isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
+                    }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">📈</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Predictive Forecasting</span>
                       <span className="ml-auto text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-semibold">NEW</span>
                     </div>
-                    <div onClick={() => setShowAIInsights(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
-                      }`}>
+                    <div onClick={() => setShowAIInsights(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                      isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
+                    }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">🤖</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>AI Insights</span>
                       <span className="ml-auto text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-semibold">NEW</span>
                     </div>
-                    <div onClick={() => setShowEnhancedScenarios(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
-                      }`}>
+                    <div onClick={() => setShowEnhancedScenarios(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                      isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
+                    }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">🎯</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Scenario Modeling</span>
                       <span className="ml-auto text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full font-semibold">ADVANCED</span>
                     </div>
-                    <div onClick={() => setShowEUTaxonomy(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
-                      }`}>
+                    <div onClick={() => setShowEUTaxonomy(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                      isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
+                    }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">🇪🇺</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>EU Taxonomy</span>
                       <span className="ml-auto text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-semibold">PHASE 2</span>
                     </div>
-                    <div onClick={() => setShowAlertCenter(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
-                      }`}>
+                    <div onClick={() => setShowAlertCenter(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                      isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
+                    }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">🔔</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Alert Center</span>
                       <span className="ml-auto text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-semibold">PHASE 2</span>
                     </div>
-                    <Link to="/cdp-questionnaire" className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
-                      }`}>
+                    <Link to="/cdp-questionnaire" className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                      isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
+                    }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">🌍</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>CDP Climate Questionnaire</span>
                       <span className="ml-auto text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-semibold">NEW</span>
@@ -546,10 +547,11 @@ function Dashboard() {
                       { icon: '📡', label: 'IoT Monitoring', link: '/iot' },
                       { icon: '🧮', label: 'ESG Calculators', link: '/calculators' }
                     ].map((action, index) => (
-                      <Link key={index} to={action.link} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${isDark
-                        ? 'hover:bg-gray-700/50'
-                        : 'hover:bg-gray-50/80 hover:shadow-md'
-                        }`}>
+                      <Link key={index} to={action.link} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                        isDark 
+                          ? 'hover:bg-gray-700/50' 
+                          : 'hover:bg-gray-50/80 hover:shadow-md'
+                      }`}>
                         <span className="text-lg group-hover:scale-110 transition-transform duration-200">{action.icon}</span>
                         <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>{action.label}</span>
                       </Link>
@@ -560,7 +562,7 @@ function Dashboard() {
 
               {/* Quick Tools */}
               <div className={`border rounded-lg p-3 ${theme.border.primary} ${showQuickTools ? 'border-teal-500 bg-teal-50/20' : ''}`}>
-                <div
+                <div 
                   className={`flex items-center justify-between cursor-pointer p-2 rounded transition-all duration-200 ${theme.hover.card}`}
                   onClick={() => setShowQuickTools(!showQuickTools)}
                 >
@@ -573,52 +575,61 @@ function Dashboard() {
                   </div>
                   <span className={`text-lg ${theme.text.secondary} transform transition-transform duration-200 ${showQuickTools ? 'rotate-90' : ''}`}>▶</span>
                 </div>
-
+                
                 {showQuickTools && (
                   <div className="mt-3 space-y-2 animate-fade-in">
-                    <div onClick={() => setShowRiskHeatmap(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
-                      }`}>
+                    <div onClick={() => setShowRiskHeatmap(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                      isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
+                    }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">🔥</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Risk Heatmap</span>
                     </div>
-                    <div onClick={() => setShowTaxonomy(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
-                      }`}>
+                    <div onClick={() => setShowTaxonomy(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                      isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
+                    }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">⚙️</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Custom Taxonomy</span>
                     </div>
-                    <div onClick={() => setShowBenchmarking(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
-                      }`}>
+                    <div onClick={() => setShowBenchmarking(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                      isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
+                    }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">📊</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Benchmarking</span>
                     </div>
-                    <div onClick={() => setShowCalendar(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
-                      }`}>
+                    <div onClick={() => setShowCalendar(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                      isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
+                    }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">📅</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Compliance Calendar</span>
                     </div>
 
-                    <div onClick={() => setShowAudit(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
-                      }`}>
+                    <div onClick={() => setShowAudit(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                      isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
+                    }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">📋</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Audit Trail</span>
                     </div>
-                    <div onClick={() => setShowWorkflow(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
-                      }`}>
+                    <div onClick={() => setShowWorkflow(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                      isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
+                    }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">✅</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Workflows</span>
                     </div>
-                    <div onClick={() => setShowEvidence(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
-                      }`}>
+                    <div onClick={() => setShowEvidence(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                      isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
+                    }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">📁</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Evidence Upload</span>
                     </div>
-                    <div onClick={() => setShowComplianceReports(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
-                      }`}>
+                    <div onClick={() => setShowComplianceReports(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                      isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
+                    }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">📊</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>Compliance Reports</span>
                     </div>
-                    <div onClick={() => setShowSupport(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
-                      }`}>
+                    <div onClick={() => setShowSupport(true)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] group ${
+                      isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50/80 hover:shadow-md'
+                    }`}>
                       <span className="text-lg group-hover:scale-110 transition-transform duration-200">🎫</span>
                       <span className={`font-medium transition-colors duration-200 ${theme.text.secondary} group-hover:${theme.text.primary}`}>24/7 Support</span>
                       <span className="ml-auto text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-semibold">NEW</span>
@@ -644,13 +655,15 @@ function Dashboard() {
                 ) : (
                   alerts.map((alert) => (
                     <div key={alert.id} className={`flex items-center gap-3 p-2 rounded-lg transition-colors duration-200 cursor-pointer ${theme.hover.subtle}`}>
-                      <div className={`w-2 h-2 rounded-full animate-pulse ${alert.type === 'high' ? 'bg-red-400' :
+                      <div className={`w-2 h-2 rounded-full animate-pulse ${
+                        alert.type === 'high' ? 'bg-red-400' : 
                         alert.type === 'medium' ? 'bg-yellow-400' : 'bg-blue-400'
-                        }`}></div>
+                      }`}></div>
                       <span className="flex-1">{alert.message}</span>
-                      <span className={`text-xs font-medium ${alert.type === 'high' ? 'text-red-500' :
+                      <span className={`text-xs font-medium ${
+                        alert.type === 'high' ? 'text-red-500' : 
                         alert.type === 'medium' ? 'text-yellow-600' : 'text-blue-600'
-                        }`}>{alert.type.toUpperCase()}</span>
+                      }`}>{alert.type.toUpperCase()}</span>
                     </div>
                   ))
                 )}
@@ -659,24 +672,25 @@ function Dashboard() {
           </div>
 
           {/* Enhanced Performance Cards */}
-          <div className={`lg:col-span-2 rounded-2xl p-6 border transition-all duration-300 ${isDark
-            ? 'bg-gray-800/90 border-gray-700 shadow-xl backdrop-blur-sm'
-            : 'bg-white/70 backdrop-blur-2xl border-white/30 shadow-lg shadow-slate-200/30'
-            }`} style={{
-              boxShadow: isDark ? '' : '0 25px 50px -12px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.3)'
-            }}>
+          <div className={`lg:col-span-2 rounded-2xl p-6 border transition-all duration-300 ${
+            isDark 
+              ? 'bg-gray-800/90 border-gray-700 shadow-xl backdrop-blur-sm' 
+              : 'bg-white/70 backdrop-blur-2xl border-white/30 shadow-lg shadow-slate-200/30'
+          }`} style={{
+            boxShadow: isDark ? '' : '0 25px 50px -12px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.3)'
+          }}>
             <div className="flex items-center gap-2 mb-6">
               <span className="text-blue-500">📊</span>
               <h2 className={`text-lg font-semibold transition-colors duration-300 ${theme.text.primary}`}>ESG Performance Overview</h2>
             </div>
-
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {[
                 { icon: '🌍', title: 'Environmental', score: kpis.environmental, target: 70 },
                 { icon: '👥', title: 'Social', score: kpis.social, target: 70 },
                 { icon: '🏛️', title: 'Governance', score: kpis.governance, target: 70 }
               ].map((metric, index) => (
-                <StatusCard
+                <StatusCard 
                   key={index}
                   icon={metric.icon}
                   title={metric.title}
@@ -685,10 +699,11 @@ function Dashboard() {
                   status={metric.score >= 70 ? "excellent" : metric.score >= 50 ? "good" : metric.score > 0 ? "warning" : "neutral"}
                 />
               ))}
-              <div className={`p-4 rounded-xl border transition-all duration-300 ${isDark
-                ? 'bg-gray-800/90 border-gray-700'
-                : 'bg-white/70 border-white/30'
-                }`}>
+              <div className={`p-4 rounded-xl border transition-all duration-300 ${
+                isDark 
+                  ? 'bg-gray-800/90 border-gray-700' 
+                  : 'bg-white/70 border-white/30'
+              }`}>
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-lg">🔗</span>
                   <h4 className={`font-semibold text-sm ${theme.text.primary}`}>Backend Integrations</h4>
@@ -702,8 +717,9 @@ function Dashboard() {
                     <span className={theme.text.secondary}>HR Integration</span>
                     <span className="text-green-500">✅ Connected</span>
                   </div>
-                  <Link to="/analytics" className={`block text-center mt-3 py-2 px-3 rounded text-xs font-medium transition-colors ${isDark ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-100 hover:bg-blue-200 text-blue-700'
-                    }`}>
+                  <Link to="/analytics" className={`block text-center mt-3 py-2 px-3 rounded text-xs font-medium transition-colors ${
+                    isDark ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-100 hover:bg-blue-200 text-blue-700'
+                  }`}>
                     View Analytics
                   </Link>
                 </div>
@@ -714,27 +730,23 @@ function Dashboard() {
       </main>
 
       {/* Component Modals */}
-      <Suspense fallback={<DashboardLoader />}>
-        {showEnhancedEntry && <UnifiedAdvancedEntry onClose={() => setShowEnhancedEntry(false)} />}
-        {showForecasting && <PredictiveForecastingDashboard onClose={() => setShowForecasting(false)} />}
-        {showAIInsights && <AIInsightsPanel onClose={() => setShowAIInsights(false)} />}
-        {showEnhancedScenarios && <EnhancedScenarioModelling onClose={() => setShowEnhancedScenarios(false)} />}
-        {showEUTaxonomy && <EUTaxonomyNavigator onClose={() => setShowEUTaxonomy(false)} />}
-        {showAlertCenter && <AlertCenter onClose={() => setShowAlertCenter(false)} />}
-        {showRiskHeatmap && <EnterpriseRiskHeatmap onClose={() => setShowRiskHeatmap(false)} />}
-        {showTaxonomy && <CustomTaxonomyBuilder onClose={() => setShowTaxonomy(false)} />}
-        {showBenchmarking && <AdvancedBenchmarking onClose={() => setShowBenchmarking(false)} />}
-        {showCalendar && <ComplianceCalendar onClose={() => setShowCalendar(false)} />}
-        {showAudit && <AuditTrailViewer onClose={() => setShowAudit(false)} />}
-        {showWorkflow && <WorkflowDashboard onClose={() => setShowWorkflow(false)} />}
-        {showEvidence && <EvidenceUploader onClose={() => setShowEvidence(false)} />}
-        {showComplianceReports && <ComplianceReports onClose={() => setShowComplianceReports(false)} />}
-        {showSupport && <SupportTicketing onClose={() => setShowSupport(false)} />}
-      </Suspense>
+      {showEnhancedEntry && <ComponentPlaceholder name="Enhanced Data Entry" onClose={() => setShowEnhancedEntry(false)} />}
+      {showForecasting && <PredictiveForecastingDashboard onClose={() => setShowForecasting(false)} />}
+      {showAIInsights && <AIInsightsPanel onClose={() => setShowAIInsights(false)} />}
+      {showEnhancedScenarios && <EnhancedScenarioModelling onClose={() => setShowEnhancedScenarios(false)} />}
+      {showEUTaxonomy && <EUTaxonomyNavigator onClose={() => setShowEUTaxonomy(false)} />}
+      {showAlertCenter && <AlertCenter onClose={() => setShowAlertCenter(false)} />}
+      {showRiskHeatmap && <EnterpriseRiskHeatmap onClose={() => setShowRiskHeatmap(false)} />}
+      {showTaxonomy && <CustomTaxonomyBuilder onClose={() => setShowTaxonomy(false)} />}
+      {showBenchmarking && <AdvancedBenchmarking onClose={() => setShowBenchmarking(false)} />}
+      {showCalendar && <ComplianceCalendar onClose={() => setShowCalendar(false)} />}
+      {showAudit && <AuditTrailViewer onClose={() => setShowAudit(false)} />}
+      {showWorkflow && <WorkflowDashboard onClose={() => setShowWorkflow(false)} />}
+      {showEvidence && <EvidenceUploader onClose={() => setShowEvidence(false)} />}
+      {showComplianceReports && <ComplianceReports onClose={() => setShowComplianceReports(false)} />}
+      {showSupport && <SupportTicketing onClose={() => setShowSupport(false)} />}
     </div>
   );
 }
-
-
 
 export default Dashboard;
