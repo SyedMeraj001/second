@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { USER_ROLES, ROLE_DISPLAY_NAMES, hasPermission, getUserRole, PERMISSIONS } from '../utils/rbac';
+import ProfessionalHeader from './ProfessionalHeader';
 
 const UserManagement = () => {
   const navigate = useNavigate();
@@ -36,13 +37,13 @@ const UserManagement = () => {
       const activeSessions = JSON.parse(localStorage.getItem('activeSessions') || '{}');
       const now = Date.now();
       const active = new Set();
-      
+
       Object.entries(activeSessions).forEach(([email, lastActive]) => {
         if (now - lastActive < 60000) {
           active.add(email);
         }
       });
-      
+
       setActiveUsers(active);
     } catch (error) {
       console.error('Failed to update active users:', error);
@@ -83,14 +84,14 @@ const UserManagement = () => {
 
     try {
       const systemUsers = JSON.parse(localStorage.getItem('systemUsers') || '[]');
-      
+
       if (systemUsers.some(u => u.email === newUser.email)) {
         return;
       }
 
       systemUsers.push(newUser);
       localStorage.setItem('systemUsers', JSON.stringify(systemUsers));
-      
+
       setUsers(systemUsers);
       setShowAddUser(false);
       setNewUser({
@@ -156,228 +157,219 @@ const UserManagement = () => {
   }
 
   return (
-    <div className={`min-h-screen p-6 ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-6 flex justify-between items-start">
-          <div>
-            <h1 className={`text-3xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-              👥 User Management
-            </h1>
-            <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              Manage system users and their roles
-            </p>
-          </div>
-          <button
-            onClick={() => navigate(-1)}
-            className={`px-4 py-2 rounded-lg transition-colors ${isDark ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
-          >
-            ← Back
-          </button>
-        </div>
-
-        <div className={`p-4 rounded-lg mb-6 ${isDark ? 'bg-gray-800' : 'bg-white'} shadow`}>
-          <div className="flex flex-col md:flex-row gap-4">
-            <input
-              type="text"
-              placeholder="🔍 Search by email or name..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className={`flex-1 px-4 py-2 rounded-lg border ${
-                isDark
-                  ? 'bg-gray-700 border-gray-600 text-white'
-                  : 'bg-white border-gray-300 text-gray-900'
-              }`}
-            />
-
-            <select
-              value={filterRole}
-              onChange={(e) => setFilterRole(e.target.value)}
-              className={`px-4 py-2 rounded-lg border ${
-                isDark
-                  ? 'bg-gray-700 border-gray-600 text-white'
-                  : 'bg-white border-gray-300 text-gray-900'
-              }`}
-            >
-              <option value="all">All Roles</option>
-              <option value={USER_ROLES.SUPER_ADMIN}>Super Admin</option>
-              <option value={USER_ROLES.SUPERVISOR}>Supervisor</option>
-              <option value={USER_ROLES.DATA_ENTRY}>Data Entry</option>
-            </select>
-
+    <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <ProfessionalHeader />
+      <div className="p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-6 flex justify-between items-start">
+            <div>
+              <h1 className={`text-3xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                👥 User Management
+              </h1>
+              <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                Manage system users and their roles
+              </p>
+            </div>
             <button
-              onClick={() => setShowAddUser(true)}
-              className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              onClick={() => navigate(-1)}
+              className={`px-4 py-2 rounded-lg transition-colors ${isDark ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
             >
-              ➕ Add User
+              ← Back
             </button>
           </div>
-        </div>
 
-        <div className={`rounded-lg shadow overflow-hidden ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className={isDark ? 'bg-gray-700' : 'bg-gray-50'}>
-                <tr>
-                  <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-                    isDark ? 'text-gray-300' : 'text-gray-700'
-                  }`}>
-                    User
-                  </th>
-                  <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-                    isDark ? 'text-gray-300' : 'text-gray-700'
-                  }`}>
-                    Email
-                  </th>
-                  <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-                    isDark ? 'text-gray-300' : 'text-gray-700'
-                  }`}>
-                    Role
-                  </th>
-                  <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-                    isDark ? 'text-gray-300' : 'text-gray-700'
-                  }`}>
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className={`divide-y ${isDark ? 'divide-gray-700' : 'divide-gray-200'}`}>
-                {filteredUsers.map((user) => (
-                  <tr key={user.email} className={isDark ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}>
-                    <td className={`px-6 py-4 whitespace-nowrap ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                      <div className="flex items-center">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center text-white font-bold">
-                          {user.fullName?.charAt(0)?.toUpperCase() || '?'}
-                        </div>
-                        <div className="ml-3">
-                          <div className="font-medium">{user.fullName}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className={`px-6 py-4 whitespace-nowrap ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                      {user.email}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <select
-                        value={user.role}
-                        onChange={(e) => handleUpdateRole(user.email, e.target.value)}
-                        className={`px-3 py-1 rounded-full text-xs font-semibold border ${getRoleColor(user.role)}`}
-                      >
-                        <option value={USER_ROLES.SUPER_ADMIN}>{ROLE_DISPLAY_NAMES[USER_ROLES.SUPER_ADMIN]}</option>
-                        <option value={USER_ROLES.SUPERVISOR}>{ROLE_DISPLAY_NAMES[USER_ROLES.SUPERVISOR]}</option>
-                        <option value={USER_ROLES.DATA_ENTRY}>{ROLE_DISPLAY_NAMES[USER_ROLES.DATA_ENTRY]}</option>
-                      </select>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-3">
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                          activeUsers.has(user.email)
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-gray-100 text-gray-600'
-                        }`}>
-                          {activeUsers.has(user.email) ? '🟢 Active' : '⚫ Offline'}
-                        </span>
-                        <button
-                          onClick={() => handleDeleteUser(user.email)}
-                          className="text-red-600 hover:text-red-800 font-medium"
-                        >
-                          🗑️ Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {showAddUser && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className={`p-6 rounded-lg shadow-xl max-w-md w-full ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
-              <h3 className={`text-xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                ➕ Add New User
-              </h3>
-
-              <div className="space-y-4">
-                <div>
-                  <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    value={newUser.fullName}
-                    onChange={(e) => setNewUser({ ...newUser, fullName: e.target.value })}
-                    className={`w-full px-3 py-2 rounded border ${
-                      isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'
-                    }`}
-                  />
-                </div>
-
-                <div>
-                  <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    value={newUser.email}
-                    onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                    className={`w-full px-3 py-2 rounded border ${
-                      isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'
-                    }`}
-                  />
-                </div>
-
-                <div>
-                  <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    value={newUser.password}
-                    onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                    className={`w-full px-3 py-2 rounded border ${
-                      isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'
-                    }`}
-                  />
-                </div>
-
-                <div>
-                  <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Role
-                  </label>
-                  <select
-                    value={newUser.role}
-                    onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
-                    className={`w-full px-3 py-2 rounded border ${
-                      isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'
-                    }`}
-                  >
-                    <option value={USER_ROLES.DATA_ENTRY}>{ROLE_DISPLAY_NAMES[USER_ROLES.DATA_ENTRY]}</option>
-                    <option value={USER_ROLES.SUPERVISOR}>{ROLE_DISPLAY_NAMES[USER_ROLES.SUPERVISOR]}</option>
-                    <option value={USER_ROLES.SUPER_ADMIN}>{ROLE_DISPLAY_NAMES[USER_ROLES.SUPER_ADMIN]}</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="flex gap-3 mt-6">
-                <button
-                  onClick={handleAddUser}
-                  className="flex-1 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                >
-                  Add User
-                </button>
-                <button
-                  onClick={() => setShowAddUser(false)}
-                  className={`flex-1 px-4 py-2 rounded ${
-                    isDark ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+          <div className={`p-4 rounded-lg mb-6 ${isDark ? 'bg-gray-800' : 'bg-white'} shadow`}>
+            <div className="flex flex-col md:flex-row gap-4">
+              <input
+                type="text"
+                placeholder="🔍 Search by email or name..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className={`flex-1 px-4 py-2 rounded-lg border ${isDark
+                  ? 'bg-gray-700 border-gray-600 text-white'
+                  : 'bg-white border-gray-300 text-gray-900'
                   }`}
-                >
-                  Cancel
-                </button>
-              </div>
+              />
+
+              <select
+                value={filterRole}
+                onChange={(e) => setFilterRole(e.target.value)}
+                className={`px-4 py-2 rounded-lg border ${isDark
+                  ? 'bg-gray-700 border-gray-600 text-white'
+                  : 'bg-white border-gray-300 text-gray-900'
+                  }`}
+              >
+                <option value="all">All Roles</option>
+                <option value={USER_ROLES.SUPER_ADMIN}>Super Admin</option>
+                <option value={USER_ROLES.SUPERVISOR}>Supervisor</option>
+                <option value={USER_ROLES.DATA_ENTRY}>Data Entry</option>
+              </select>
+
+              <button
+                onClick={() => setShowAddUser(true)}
+                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              >
+                ➕ Add User
+              </button>
             </div>
           </div>
-        )}
+
+          <div className={`rounded-lg shadow overflow-hidden ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className={isDark ? 'bg-gray-700' : 'bg-gray-50'}>
+                  <tr>
+                    <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${isDark ? 'text-gray-300' : 'text-gray-700'
+                      }`}>
+                      User
+                    </th>
+                    <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${isDark ? 'text-gray-300' : 'text-gray-700'
+                      }`}>
+                      Email
+                    </th>
+                    <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${isDark ? 'text-gray-300' : 'text-gray-700'
+                      }`}>
+                      Role
+                    </th>
+                    <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${isDark ? 'text-gray-300' : 'text-gray-700'
+                      }`}>
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className={`divide-y ${isDark ? 'divide-gray-700' : 'divide-gray-200'}`}>
+                  {filteredUsers.map((user) => (
+                    <tr key={user.email} className={isDark ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}>
+                      <td className={`px-6 py-4 whitespace-nowrap ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                        <div className="flex items-center">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center text-white font-bold">
+                            {user.fullName?.charAt(0)?.toUpperCase() || '?'}
+                          </div>
+                          <div className="ml-3">
+                            <div className="font-medium">{user.fullName}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className={`px-6 py-4 whitespace-nowrap ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                        {user.email}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <select
+                          value={user.role}
+                          onChange={(e) => handleUpdateRole(user.email, e.target.value)}
+                          className={`px-3 py-1 rounded-full text-xs font-semibold border ${getRoleColor(user.role)}`}
+                        >
+                          <option value={USER_ROLES.SUPER_ADMIN}>{ROLE_DISPLAY_NAMES[USER_ROLES.SUPER_ADMIN]}</option>
+                          <option value={USER_ROLES.SUPERVISOR}>{ROLE_DISPLAY_NAMES[USER_ROLES.SUPERVISOR]}</option>
+                          <option value={USER_ROLES.DATA_ENTRY}>{ROLE_DISPLAY_NAMES[USER_ROLES.DATA_ENTRY]}</option>
+                        </select>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-3">
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${activeUsers.has(user.email)
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-gray-100 text-gray-600'
+                            }`}>
+                            {activeUsers.has(user.email) ? '🟢 Active' : '⚫ Offline'}
+                          </span>
+                          <button
+                            onClick={() => handleDeleteUser(user.email)}
+                            className="text-red-600 hover:text-red-800 font-medium"
+                          >
+                            🗑️ Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {showAddUser && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className={`p-6 rounded-lg shadow-xl max-w-md w-full ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
+                <h3 className={`text-xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  ➕ Add New User
+                </h3>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      value={newUser.fullName}
+                      onChange={(e) => setNewUser({ ...newUser, fullName: e.target.value })}
+                      className={`w-full px-3 py-2 rounded border ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'
+                        }`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      value={newUser.email}
+                      onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                      className={`w-full px-3 py-2 rounded border ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'
+                        }`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                      Password
+                    </label>
+                    <input
+                      type="password"
+                      value={newUser.password}
+                      onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                      className={`w-full px-3 py-2 rounded border ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'
+                        }`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                      Role
+                    </label>
+                    <select
+                      value={newUser.role}
+                      onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+                      className={`w-full px-3 py-2 rounded border ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'
+                        }`}
+                    >
+                      <option value={USER_ROLES.DATA_ENTRY}>{ROLE_DISPLAY_NAMES[USER_ROLES.DATA_ENTRY]}</option>
+                      <option value={USER_ROLES.SUPERVISOR}>{ROLE_DISPLAY_NAMES[USER_ROLES.SUPERVISOR]}</option>
+                      <option value={USER_ROLES.SUPER_ADMIN}>{ROLE_DISPLAY_NAMES[USER_ROLES.SUPER_ADMIN]}</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 mt-6">
+                  <button
+                    onClick={handleAddUser}
+                    className="flex-1 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                  >
+                    Add User
+                  </button>
+                  <button
+                    onClick={() => setShowAddUser(false)}
+                    className={`flex-1 px-4 py-2 rounded ${isDark ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                      }`}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

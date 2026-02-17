@@ -1,7 +1,45 @@
 import React, { useEffect, useState, Suspense, lazy } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "./contexts/ThemeContext";
-import { MetricCard, StatusCard } from "./components/ProfessionalCard";
+
+// Dynamic import wrapper for named exports
+const importProfessionalCard = async () => {
+  const module = await import("./components/ProfessionalCard");
+  return module;
+};
+
+// Lazy Card components
+const MetricCard = (props) => {
+  const [CardComponent, setCardComponent] = useState(null);
+
+  useEffect(() => {
+    importProfessionalCard().then(module => {
+      setCardComponent(() => module.MetricCard);
+    });
+  }, []);
+
+  if (!CardComponent) {
+    return <div className="animate-pulse bg-gray-200 rounded-lg h-32" />;
+  }
+
+  return <CardComponent {...props} />;
+};
+
+const StatusCard = (props) => {
+  const [CardComponent, setCardComponent] = useState(null);
+
+  useEffect(() => {
+    importProfessionalCard().then(module => {
+      setCardComponent(() => module.StatusCard);
+    });
+  }, []);
+
+  if (!CardComponent) {
+    return <div className="animate-pulse bg-gray-200 rounded-lg h-32" />;
+  }
+
+  return <CardComponent {...props} />;
+};
 
 // Lazy load components to prevent circular dependencies
 const ProfessionalHeader = lazy(() => import("./components/ProfessionalHeader"));
@@ -19,7 +57,7 @@ const WorkflowDashboard = lazy(() => import("./components/WorkflowDashboard"));
 const EvidenceUploader = lazy(() => import("./components/EvidenceUploader"));
 const ComplianceReports = lazy(() => import("./components/ComplianceReports"));
 const SupportTicketing = lazy(() => import("./components/SupportTicketing"));
-const UnifiedAdvancedEntry = lazy(() => import("./modules/UnifiedAdvancedEntry"));
+const UnifiedAdvancedEntry = lazy(() => import("./components/UnifiedAdvancedEntryWrapper"));
 
 // Simple loading fallback
 const DashboardLoader = () => (

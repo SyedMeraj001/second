@@ -14,14 +14,14 @@ router.post('/devices/register', async (req, res) => {
     if (!req.user) {
       return res.status(401).json({ error: 'Authentication required' });
     }
-    
+
     // Validate CSRF token
     if (!req.headers['x-csrf-token']) {
       return res.status(403).json({ error: 'CSRF token required' });
     }
-    
+
     const { deviceId, deviceType, location, metadata } = req.body;
-    
+
     const device = await models.IoTDevice.create({
       deviceId,
       deviceType,
@@ -51,19 +51,19 @@ router.post('/data/ingest', async (req, res) => {
     if (!req.user) {
       return res.status(401).json({ error: 'Authentication required' });
     }
-    
+
     // Validate CSRF token
     if (!req.headers['x-csrf-token']) {
       return res.status(403).json({ error: 'CSRF token required' });
     }
-    
+
     const { deviceId, sensorType, value, unit, timestamp } = req.body;
-    
+
     const result = await IoTDataProcessor.processIncomingData(
-      deviceId, 
-      sensorType, 
-      value, 
-      unit, 
+      deviceId,
+      sensorType,
+      value,
+      unit,
       timestamp ? new Date(timestamp) : new Date()
     );
 
@@ -83,10 +83,10 @@ router.post('/data/ingest', async (req, res) => {
 /**
  * Get comprehensive real-time ESG metrics
  */
-router.get('/metrics/realtime', async (res) => {
+router.get('/metrics/realtime', async (req, res) => {
   try {
     const metrics = await IoTDataProcessor.calculateRealTimeESGScore();
-    
+
     res.json({
       success: true,
       data: metrics,
@@ -110,7 +110,7 @@ router.get('/devices/analytics', async (req, res) => {
     const since = new Date(Date.now() - hours * 60 * 60 * 1000);
 
     const analytics = await IoTDataProcessor.getDeviceAnalytics(since);
-    
+
     res.json({
       success: true,
       data: analytics,
@@ -128,10 +128,10 @@ router.get('/devices/analytics', async (req, res) => {
 /**
  * Get ESG impact summary
  */
-router.get('/metrics/esg-impact', async (res) => {
+router.get('/metrics/esg-impact', async (req, res) => {
   try {
     const impact = await IoTDataProcessor.calculateESGImpact();
-    
+
     res.json({
       success: true,
       data: impact,
@@ -148,7 +148,7 @@ router.get('/metrics/esg-impact', async (res) => {
 /**
  * Get comprehensive device status with analytics
  */
-router.get('/devices/status', async (res) => {
+router.get('/devices/status', async (req, res) => {
   try {
     const devices = await models.IoTDevice.findAll({
       attributes: ['deviceId', 'deviceType', 'location', 'status', 'lastHeartbeat', 'metadata']
@@ -214,27 +214,27 @@ router.put('/devices/:deviceId/status', async (req, res) => {
     if (!req.user) {
       return res.status(401).json({ error: 'Authentication required' });
     }
-    
+
     // Validate CSRF token
     if (!req.headers['x-csrf-token']) {
       return res.status(403).json({ error: 'CSRF token required' });
     }
-    
+
     const { deviceId } = req.params;
     const { status } = req.body;
-    
+
     const device = await models.IoTDevice.findOne({ where: { deviceId } });
-    
+
     if (!device) {
       return res.status(404).json({
         success: false,
         error: 'Device not found'
       });
     }
-    
+
     device.status = status;
     await device.save();
-    
+
     res.json({
       success: true,
       message: 'Device status updated successfully',
@@ -257,24 +257,24 @@ router.delete('/devices/:deviceId', async (req, res) => {
     if (!req.user) {
       return res.status(401).json({ error: 'Authentication required' });
     }
-    
+
     // Validate CSRF token
     if (!req.headers['x-csrf-token']) {
       return res.status(403).json({ error: 'CSRF token required' });
     }
-    
+
     const { deviceId } = req.params;
-    
+
     // Delete associated sensor data first
     await models.IoTSensorData.destroy({
       where: { deviceId }
     });
-    
+
     // Delete the device
     const deleted = await models.IoTDevice.destroy({
       where: { deviceId }
     });
-    
+
     if (deleted) {
       res.json({
         success: true,
@@ -301,9 +301,9 @@ router.get('/data/history/:deviceId', async (req, res) => {
   try {
     const { deviceId } = req.params;
     const { hours = 24 } = req.query;
-    
+
     const since = new Date(Date.now() - hours * 60 * 60 * 1000);
-    
+
     const data = await models.IoTSensorData.findAll({
       where: {
         deviceId,

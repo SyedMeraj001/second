@@ -11,7 +11,7 @@ import { useTheme } from "./contexts/ThemeContext";
 import { getThemeClasses } from "./utils/themeUtils";
 import ProfessionalHeader from "./components/ProfessionalHeader";
 import { Alert, Button, Toast } from "./components/ProfessionalUX";
-const UnifiedAdvancedEntry = lazy(() => import("./modules/UnifiedAdvancedEntry"));
+const UnifiedAdvancedEntry = lazy(() => import("./components/UnifiedAdvancedEntryWrapper"));
 import SiteHierarchyManager from "./modules/SiteHierarchyManager";
 import { getUserRole } from "./utils/rbac";
 import AuditTrailViewer from "./components/AuditTrailViewer";
